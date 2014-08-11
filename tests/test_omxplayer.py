@@ -1,8 +1,9 @@
 import unittest
+
 from mock import patch, Mock
-from pyomxplayerng import OMXPlayer
 from nose_parameterized import parameterized
-import subprocess
+
+from pyomxplayerng import OMXPlayer
 
 
 @patch('dbus.Interface')
@@ -36,7 +37,11 @@ class OMXPlayerTests(unittest.TestCase):
 
         mock_bus.get_object.assert_called_once_with('org.mpris.MediaPlayer2.omxplayer', '/org/mpris/MediaPlayer2')
 
-    def test_constructs_property_interface(self, popen, BusConnection, Interface):
+    @parameterized.expand([
+        ['org.freedesktop.DBus.Properties'],
+        ['org.mpris.MediaPlayer2']
+    ])
+    def test_constructs_dbus_interfaces(self, popen, BusConnection, Interface, interface):
         proxy = Mock()
         bus = Mock()
         bus.get_object = Mock(return_value=proxy)
@@ -46,5 +51,5 @@ class OMXPlayerTests(unittest.TestCase):
 
         OMXPlayer('test.mp4', bus_address_finder=bus_address_finder)
 
-        Interface.assert_called_once_with(proxy, 'org.freedesktop.DBus.Properties')
+        Interface.assert_any_call(proxy, interface)
 
