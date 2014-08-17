@@ -60,6 +60,9 @@ class OMXPlayer(object):
     def can_play(self):
         return bool(self._get_properties_interface().CanPlay())
 
+    def can_pause(self):
+        return bool(self._get_properties_interface().CanPause())
+
     def playback_status(self):
         return str(self._get_properties_interface().PlaybackStatus())
 
@@ -82,7 +85,7 @@ class OMXPlayer(object):
         return int(self._get_properties_interface().Duration())
 
     def duration(self):
-        return self.duration_us() / (1000 * 1000)
+        return self.duration_us() / (1000 * 1000.0)
 
     def _get_properties_interface(self):
         return self.connection.properties_interface
