@@ -20,7 +20,7 @@ class OMXPlayer(object):
             bus_address_finder = pyomxplayerng.bus_finder.BusFinder()
         try:
             return Connection(bus_address_finder.get_address())
-        except DBusConnectionError:
+        except DBusConnectionError, IOError:
             connection = None
             if self.tries < 50:
                 self.tries += 1
