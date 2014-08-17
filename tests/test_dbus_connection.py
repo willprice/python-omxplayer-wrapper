@@ -40,6 +40,20 @@ class DBusConnectionTests(unittest.TestCase):
 
             Interface.assert_any_call(self.proxy, interface)
 
+    def test_constructs_properties_interface(self, BusConnection):
+        with patch('dbus.Interface') as Interface:
+            properties_interface = Mock()
+            Interface.return_value = properties_interface
+            connection = self.create_example_dbus_connection()
+            self.assertEqual(properties_interface, connection.properties_interface)
+
+    def test_constructs_MediaPlayer2_interface(self, *args):
+        with patch('dbus.Interface') as Interface:
+            mpris_interface = Mock()
+            Interface.return_value = mpris_interface
+            connection = self.create_example_dbus_connection()
+            self.assertEqual(mpris_interface, connection.mpris_interface)
+
     def test_raises_error_if_cant_obtain_proxy(self, BusConnection):
         self.bus.get_object = Mock(side_effect=DBusException)
         BusConnection.return_value = self.bus

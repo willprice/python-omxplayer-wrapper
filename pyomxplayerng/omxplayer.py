@@ -9,7 +9,7 @@ class OMXPlayer(object):
     def __init__(self, filename, bus_address_finder=None, Connection=None):
         self.tries = 0
         self._process = subprocess.Popen(['omxplayer', filename])
-        self.setup_dbus_connection(Connection, bus_address_finder)
+        self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
         if not Connection:
@@ -17,11 +17,12 @@ class OMXPlayer(object):
         if not bus_address_finder:
             bus_address_finder = pyomxplayerng.bus_finder.BusFinder()
         try:
-            self.connection = Connection(bus_address_finder.get_address())
+            return Connection(bus_address_finder.get_address())
         except DBusConnectionError:
+            connection = None
             if self.tries < 50:
                 self.tries += 1
                 time.sleep(0.05)
-                self.setup_dbus_connection(Connection, bus_address_finder)
+                return self.setup_dbus_connection(Connection, bus_address_finder)
             else:
                 raise SystemError('DBus cannot connect to the OMXPlayer process')
