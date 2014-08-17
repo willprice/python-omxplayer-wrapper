@@ -33,7 +33,7 @@ class DBusConnectionTests(unittest.TestCase):
 
     @parameterized.expand([
         ['org.mpris.MediaPlayer2'],
-        ['org.mpris.MediaPlayer2.Player']
+        ['org.freedesktop.DBus.Properties']
     ])
     def test_constructs_dbus_interfaces(self, BusConnection, interface):
         with patch('dbus.Interface') as Interface:
