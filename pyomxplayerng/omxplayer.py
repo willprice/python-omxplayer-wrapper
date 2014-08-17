@@ -29,69 +29,114 @@ class OMXPlayer(object):
             else:
                 raise SystemError('DBus cannot connect to the OMXPlayer process')
 
+    """ ROOT INTERFACE METHODS """
+
     def can_quit(self):
-        return bool(self._get_properties_interface().CanQuit())
+        return bool(self._get_root_interface().CanQuit())
+
+    def can_raise(self):
+        return bool(self._get_root_interface().CanRaise())
 
     def fullscreen(self):
-        return bool(self._get_properties_interface().FullScreen())
+        return bool(self._get_root_interface().FullScreen())
 
     def can_set_fullscreen(self):
-        return bool(self._get_properties_interface().CanSetFullscreen())
+        return bool(self._get_root_interface().CanSetFullscreen())
 
     def has_track_list(self):
-        return bool(self._get_properties_interface().HasTrackList())
+        return bool(self._get_root_interface().HasTrackList())
 
     def identity(self):
-        return str(self._get_properties_interface().Identity())
+        return str(self._get_root_interface().Identity())
 
     def supported_uri_schemes(self):
-        return map(str, self._get_properties_interface().SupportedUriSchemes())
+        return map(str, self._get_root_interface().SupportedUriSchemes())
+
+    """ PLAYER INTERFACE PROPERTIES """
 
     def can_go_next(self):
-        return bool(self._get_properties_interface().CanGoNext())
+        return bool(self._get_player_interface().CanGoNext())
 
     def can_go_previous(self):
-        return bool(self._get_properties_interface().CanGoPrevious())
+        return bool(self._get_player_interface().CanGoPrevious())
 
     def can_seek(self):
-        return bool(self._get_properties_interface().CanSeek())
+        return bool(self._get_player_interface().CanSeek())
 
     def can_control(self):
-        return bool(self._get_properties_interface().CanControl())
+        return bool(self._get_player_interface().CanControl())
 
     def can_play(self):
-        return bool(self._get_properties_interface().CanPlay())
+        return bool(self._get_player_interface().CanPlay())
 
     def can_pause(self):
-        return bool(self._get_properties_interface().CanPause())
+        return bool(self._get_player_interface().CanPause())
 
     def playback_status(self):
-        return str(self._get_properties_interface().PlaybackStatus())
+        return str(self._get_player_interface().PlaybackStatus())
 
     def volume(self):
-        return float(self._get_properties_interface().Volume())
+        return float(self._get_player_interface().Volume())
 
     def set_volume(self, volume):
-        return float(self._get_properties_interface().Volume(volume))
+        return float(self._get_player_interface().Volume(volume))
 
     def mute(self):
-        self._get_properties_interface().Mute()
+        self._get_player_interface().Mute()
 
     def unmute(self):
-        self._get_properties_interface().Unmute()
+        self._get_player_interface().Unmute()
 
     def position(self):
-        return int(self._get_properties_interface().Position())
+        return int(self._get_player_interface().Position())
 
     def duration_us(self):
-        return int(self._get_properties_interface().Duration())
+        return int(self._get_player_interface().Duration())
 
     def duration(self):
         return self.duration_us() / (1000 * 1000.0)
 
-    def pause(self):
-        self.connection.mpris_interface.Pause()
+    def minimum_rate(self):
+        return float(self._get_player_interface().MinimumRate())
 
-    def _get_properties_interface(self):
-        return self.connection.properties_interface
+    def maximum_rate(self):
+        return float(self._get_player_interface().MaximumRate())
+
+    """ PLAYER INTERFACE METHODS """
+
+    def next(self):
+        self._get_player_interface().Next()
+
+    def previous(self):
+        self._get_player_interface().Previous()
+
+    def pause(self):
+        """
+        Toggles playing state.
+        """
+        self._get_player_interface().Pause()
+
+    def play_pause(self):
+        self.pause()
+
+    def stop(self):
+        self._get_player_interface().Stop()
+
+    def seek(self, relative_position_us):
+        self._get_player_interface().Seek(relative_position_us)
+
+    def set_position(self, position_us):
+        self._get_player_interface().SetPosition(position_us)
+
+    def list_subtitles(self):
+        return map(str, self._get_player_interface().ListSubtitles())
+
+    def action(self, key):
+        self._get_player_interface().Action(key)
+
+    def _get_root_interface(self):
+        return self.connection.root_interface
+
+    def _get_player_interface(self):
+        return self.connection.player_interface
 

@@ -13,12 +13,13 @@ class DBusConnection(object):
                                 this makes communicating with a similar to that of communicating
                                 with a  POJO.
     properties_interface        org.freedesktop.DBus.Properties interface proxy object
-    mpris_interface             org.mpris.MediaPlayer2 interface proxy object
+    root_interface              org.mpris.MediaPlayer2 interface proxy object
+    player_interface            org.mpris.MediaPlayer2.Player interface proxy object
     """
 
     def __init__(self, bus_address):
-        self.mpris_interface = None
-        self.properties_interface = None
+        self.root_interface = None
+        self.player_interface = None
         self._address = bus_address
         self._bus = self._create_connection()
         self.proxy = self._create_proxy()
@@ -37,8 +38,8 @@ class DBusConnection(object):
             raise DBusConnectionError('Could not get proxy object')
 
     def _create_media_interfaces_on_proxy(self, proxy):
-        self.properties_interface = self._interface(proxy, 'org.freedesktop.DBus.Properties')
-        self.mpris_interface = self._interface(proxy, 'org.mpris.MediaPlayer2')
+        self.root_interface = self._interface(proxy, 'org.mpris.MediaPlayer2')
+        self.player_interface = self._interface(proxy, 'org.mpris.MediaPlayer2.Player')
 
     def _interface(self, proxy, interface):
         return dbus.Interface(proxy, interface)
