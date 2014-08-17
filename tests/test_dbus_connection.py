@@ -2,8 +2,9 @@ import unittest
 
 from nose_parameterized import parameterized
 from mock import patch, Mock
+from dbus import DBusException
 
-from pyomxplayerng.dbus_connection import DBusConnection
+from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
 
 
 @patch('dbus.bus.BusConnection')
@@ -39,5 +40,11 @@ class DBusConnectionTests(unittest.TestCase):
 
             Interface.assert_any_call(self.proxy, interface)
 
+    def test_raises_error_if_cant_obtain_proxy(self, BusConnection):
+        self.bus.get_object = Mock(side_effect=DBusException)
+        BusConnection.return_value = self.bus
+        with self.assertRaises(DBusConnectionError):
+            connection = self.create_example_dbus_connection()
+
     def create_example_dbus_connection(self, address="example_bus_address"):
-        DBusConnection(address)
+        return DBusConnection(address)

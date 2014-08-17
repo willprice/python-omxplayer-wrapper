@@ -1,6 +1,11 @@
 import dbus
 
 
+class DBusConnectionError(Exception):
+    """ Connection error raised when DBusConnection can't set up connection
+    """
+    pass
+
 class DBusConnection(object):
     """
     Attributes:
@@ -12,14 +17,18 @@ class DBusConnection(object):
     def __init__(self, bus_address):
         self._address = bus_address
         self._bus = self._create_connection()
-        self.proxy = self._get_proxy()
-        self._create_media_interfaces_on_proxy(self.proxy)
+        self.proxy = self._create_proxy()
 
     def _create_connection(self):
         return dbus.bus.BusConnection(self._address)
 
-    def _get_proxy(self):
-        return self._bus.get_object('org.mpris.MediaPlayer2.omxplayer', '/org/mpris/MediaPlayer2')
+    def _create_proxy(self):
+        try:
+            proxy = self._bus.get_object('org.mpris.MediaPlayer2.omxplayer', '/org/mpris/MediaPlayer2')
+            self._create_media_interfaces_on_proxy(proxy)
+            return proxy
+        except dbus.DBusException:
+            raise DBusConnectionError('Could not get proxy object')
 
     def _create_media_interfaces_on_proxy(self, proxy):
         self._interface(proxy, 'org.freedesktop.DBus.Properties')
