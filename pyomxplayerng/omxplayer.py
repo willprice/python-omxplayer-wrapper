@@ -8,8 +8,10 @@ from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
 class OMXPlayer(object):
     def __init__(self, filename, bus_address_finder=None, Connection=None):
         self.tries = 0
+        self.is_playing = True
         self._process = subprocess.Popen(['omxplayer', filename])
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
+        self.pause()
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
         if not Connection:
@@ -87,5 +89,9 @@ class OMXPlayer(object):
     def duration(self):
         return self.duration_us() / (1000 * 1000.0)
 
+    def pause(self):
+        self.connection.mpris_interface.Pause()
+
     def _get_properties_interface(self):
         return self.connection.properties_interface
+
