@@ -33,6 +33,7 @@ class DBusConnectionTests(unittest.TestCase):
 
     @parameterized.expand([
         ['org.mpris.MediaPlayer2'],
+        ['org.mpris.MediaPlayer2.Player'],
         ['org.freedesktop.DBus.Properties']
     ])
     def test_constructs_dbus_interfaces(self, BusConnection, interface):
@@ -49,6 +50,13 @@ class DBusConnectionTests(unittest.TestCase):
             connection = self.create_example_dbus_connection()
             self.assertEqual(mpris_interface, connection.root_interface)
 
+    def test_constructs_properties_interface(self, *args):
+        with patch('dbus.Interface') as Interface:
+            properties_interface = Mock()
+            Interface.return_value = properties_interface
+            connection = self.create_example_dbus_connection()
+            self.assertEqual(properties_interface, connection.properties_interface)
+            
     def test_constructs_player_interface(self, *args):
         with patch('dbus.Interface') as Interface:
             player_interface = Mock()

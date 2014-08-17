@@ -2,7 +2,7 @@ import dbus
 
 
 class DBusConnectionError(Exception):
-    """ Connection error raised when DBusConnection can't set up connection
+    """ Connection error raised when DBusConnection can't set up a connection
     """
     pass
 
@@ -12,7 +12,6 @@ class DBusConnection(object):
     proxy                       The proxy object by which one interacts with a dbus object,
                                 this makes communicating with a similar to that of communicating
                                 with a  POJO.
-    properties_interface        org.freedesktop.DBus.Properties interface proxy object
     root_interface              org.mpris.MediaPlayer2 interface proxy object
     player_interface            org.mpris.MediaPlayer2.Player interface proxy object
     """
@@ -39,7 +38,8 @@ class DBusConnection(object):
 
     def _create_media_interfaces_on_proxy(self, proxy):
         self.root_interface = self._interface(proxy, 'org.mpris.MediaPlayer2')
-        self.player_interface = self._interface(proxy, 'org.freedesktop.DBus.Properties')
+        self.player_interface = self._interface(proxy, 'org.mpris.MediaPlayer2.Player')
+        self.properties_interface = self._interface(proxy, 'org.freedesktop.DBus.Properties')
 
     def _interface(self, proxy, interface):
         return dbus.Interface(proxy, interface)

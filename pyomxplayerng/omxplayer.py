@@ -5,6 +5,9 @@ import pyomxplayerng.bus_finder
 from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
 
 
+RETRY_DELAY = 0.05
+
+
 class OMXPlayer(object):
     def __init__(self, filename, bus_address_finder=None, Connection=None):
         self.tries = 0
@@ -22,12 +25,16 @@ class OMXPlayer(object):
             return Connection(bus_address_finder.get_address())
         except DBusConnectionError, IOError:
             connection = None
-            if self.tries < 50:
-                self.tries += 1
-                time.sleep(0.05)
-                return self.setup_dbus_connection(Connection, bus_address_finder)
-            else:
-                raise SystemError('DBus cannot connect to the OMXPlayer process')
+            self.handle_failed_dbus_connection(Connection, bus_address_finder)
+
+    def handle_failed_dbus_connection(self, Connection, bus_address_finder):
+        if self.tries < 50:
+            self.tries += 1
+            time.sleep(RETRY_DELAY)
+            return self.setup_dbus_connection(Connection, bus_address_finder)
+        else:
+            raise SystemError('DBus cannot connect to the OMXPlayer process')
+
 
     """ ROOT INTERFACE METHODS """
 
@@ -55,52 +62,53 @@ class OMXPlayer(object):
     """ PLAYER INTERFACE PROPERTIES """
 
     def can_go_next(self):
-        return bool(self._get_player_interface().CanGoNext())
+        return bool(self._get_properties_interface().CanGoNext())
 
     def can_go_previous(self):
-        return bool(self._get_player_interface().CanGoPrevious())
+        return bool(self._get_properties_interface().CanGoPrevious())
 
     def can_seek(self):
-        return bool(self._get_player_interface().CanSeek())
+        return bool(self._get_properties_interface().CanSeek())
 
     def can_control(self):
-        return bool(self._get_player_interface().CanControl())
+        return bool(self._get_properties_interface().CanControl())
 
     def can_play(self):
-        return bool(self._get_player_interface().CanPlay())
+        return bool(self._get_properties_interface().CanPlay())
 
     def can_pause(self):
-        return bool(self._get_player_interface().CanPause())
+        return bool(self._get_properties_interface().CanPause())
 
     def playback_status(self):
-        return str(self._get_player_interface().PlaybackStatus())
+        return str(self._get_properties_interface().PlaybackStatus())
 
     def volume(self):
-        return float(self._get_player_interface().Volume())
+        return float(self._get_properties_interface().Volume())
 
     def set_volume(self, volume):
-        return float(self._get_player_interface().Volume(volume))
+        return float(self._get_properties_interface().Volume(volume))
 
     def mute(self):
-        self._get_player_interface().Mute()
+        self._get_properties_interface().Mute()
 
     def unmute(self):
-        self._get_player_interface().Unmute()
+        self._get_properties_interface().Unmute()
 
     def position(self):
-        return int(self._get_player_interface().Position())
+        return int(self._get_properties_interface().Position())
 
     def duration_us(self):
-        return int(self._get_player_interface().Duration())
+        return int(self._get_properties_interface().Duration())
 
     def duration(self):
         return self.duration_us() / (1000 * 1000.0)
 
     def minimum_rate(self):
-        return float(self._get_player_interface().MinimumRate())
+        return float(self._get_properties_interface().MinimumRate())
 
     def maximum_rate(self):
-        return float(self._get_player_interface().MaximumRate())
+        return float(self._get_properties_interface().MaximumRate())
+
 
     """ PLAYER INTERFACE METHODS """
 
@@ -140,3 +148,5 @@ class OMXPlayer(object):
     def _get_player_interface(self):
         return self.connection.player_interface
 
+    def _get_properties_interface(self):
+        return self.connection.properties_interface
