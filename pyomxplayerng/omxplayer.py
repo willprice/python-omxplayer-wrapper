@@ -142,6 +142,11 @@ class OMXPlayer(object):
     def action(self, key):
         self._get_player_interface().Action(key)
 
+    def play_synch(self):
+        self.play_pause()
+        while self.playback_status() == 'Playing':
+            time.sleep(0.05)
+
     def _get_root_interface(self):
         return self.connection.root_interface
 
