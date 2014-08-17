@@ -27,7 +27,9 @@ class DBusConnectionTests(unittest.TestCase):
         BusConnection.return_value = self.bus
         self.create_example_dbus_connection()
 
-        self.bus.get_object.assert_called_once_with('org.mpris.MediaPlayer2.omxplayer', '/org/mpris/MediaPlayer2')
+        self.bus.get_object.assert_called_once_with('org.mpris.MediaPlayer2.omxplayer',
+                                                    '/org/mpris/MediaPlayer2',
+                                                    introspect=False)
 
     @parameterized.expand([
         ['org.freedesktop.DBus.Properties'],
