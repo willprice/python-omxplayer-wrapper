@@ -1,4 +1,5 @@
 To pass the _basic playback_ user story we must implement the following functions defined in the DBus spec:
+
 - `Pause`
 - `Position`
 - `CanQuit`

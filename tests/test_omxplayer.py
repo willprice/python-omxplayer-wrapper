@@ -1,55 +1,56 @@
 import unittest
 
 from mock import patch, Mock
+
 from nose_parameterized import parameterized
 
 from pyomxplayerng import OMXPlayer
+from pyomxplayerng.omxplayer import DBusConnection
 
 
-@patch('dbus.Interface')
 @patch('dbus.bus.BusConnection')
-@patch('subprocess.Popen')
-class OMXPlayerTests(unittest.TestCase):
-    def test_opens_file_in_omxplayer(self, popen, *args):
-        OMXPlayer('test.mp4')
-        popen.assert_called_once_with(['omxplayer', 'test.mp4'])
+class DBusConnectionTests(unittest.TestCase):
+    def setUp(self):
+        self.proxy = Mock()
+        self.bus = Mock()
+        self.bus.get_object = Mock(return_value=self.proxy)
 
     @parameterized.expand([
         ['unix:abstract=/tmp/dbus-EXAMPLE,guid=EXAMPLE'],
         ['unix:abstract=/tmp/dbus-EXAMPLE2,guid=EXAMPLE2'],
     ])
-    def test_connects_to_omxplayer_bus(self, popen, BusConnection, bus_address, *args):
-        bus_address_finder = Mock()
-        bus_address_finder.get_address = Mock(return_value=bus_address)
-
-        OMXPlayer('test.mp4', bus_address_finder=bus_address_finder)
-
+    def test_connects_to_omxplayer_bus(self, BusConnection, bus_address, *args):
+        self.create_example_dbus_connection(bus_address)
         BusConnection.assert_called_once_with(bus_address)
 
-    def test_constructs_proxy_for_omxplayer(self, popen, BusConnection, *args):
-        mock_bus = Mock()
-        mock_bus.get_object = Mock()
-        BusConnection.return_value = mock_bus
-        bus_address_finder = Mock()
-        bus_address_finder.get_address = Mock(return_value="example_bus_address")
 
-        OMXPlayer('test.mp4', bus_address_finder=bus_address_finder)
+    def test_constructs_proxy_for_omxplayer(self, BusConnection, *args):
+        BusConnection.return_value = self.bus
+        self.create_example_dbus_connection()
 
-        mock_bus.get_object.assert_called_once_with('org.mpris.MediaPlayer2.omxplayer', '/org/mpris/MediaPlayer2')
+        self.bus.get_object.assert_called_once_with('org.mpris.MediaPlayer2.omxplayer', '/org/mpris/MediaPlayer2')
 
     @parameterized.expand([
         ['org.freedesktop.DBus.Properties'],
         ['org.mpris.MediaPlayer2']
     ])
-    def test_constructs_dbus_interfaces(self, popen, BusConnection, Interface, interface):
-        proxy = Mock()
-        bus = Mock()
-        bus.get_object = Mock(return_value=proxy)
-        BusConnection.return_value = bus
-        bus_address_finder = Mock()
-        bus_address_finder.get_address = Mock(return_value="example_bus_address")
+    def test_constructs_dbus_interfaces(self, BusConnection, interface):
+        with patch('dbus.Interface') as Interface:
+            BusConnection.return_value = self.bus
+            self.create_example_dbus_connection()
 
-        OMXPlayer('test.mp4', bus_address_finder=bus_address_finder)
+            Interface.assert_any_call(self.proxy, interface)
 
-        Interface.assert_any_call(proxy, interface)
+    def create_example_dbus_connection(self, address="example_bus_address"):
+        DBusConnection(address)
 
+
+@patch('subprocess.Popen')
+class OMXPlayerTests(unittest.TestCase):
+    def test_opens_file_in_omxplayer(self, popen):
+        self.patch_and_run_omxplayer()
+        popen.assert_called_once_with(['omxplayer', 'test.mp4'])
+
+    # Must have the prefix 'patch' for the decorators to take effect
+    def patch_and_run_omxplayer(self):
+        OMXPlayer('test.mp4', connection=Mock())
