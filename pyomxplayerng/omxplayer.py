@@ -25,7 +25,7 @@ class OMXPlayer(object):
             return Connection(bus_address_finder.get_address())
         except DBusConnectionError, IOError:
             connection = None
-            self.handle_failed_dbus_connection(Connection, bus_address_finder)
+            return self.handle_failed_dbus_connection(Connection, bus_address_finder)
 
     def handle_failed_dbus_connection(self, Connection, bus_address_finder):
         if self.tries < 50:
