@@ -11,7 +11,7 @@ RETRY_DELAY = 0.05
 class OMXPlayer(object):
     def __init__(self, filename, bus_address_finder=None, Connection=None):
         self.tries = 0
-        self.is_playing = True
+        self._is_playing = True
         self._process = subprocess.Popen(['omxplayer', filename])
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
         self.pause()
@@ -142,13 +142,14 @@ class OMXPlayer(object):
     def action(self, key):
         self._get_player_interface().Action(key)
 
+    def is_playing(self):
+        self._is_playing = self.playback_status().lower().find('playing') != -1
+        return self._is_playing
+
     def play_synch(self):
         self.play_pause()
         while self.is_playing():
             time.sleep(0.05)
-
-    def is_playing(self):
-        return self.playback_status().lower().find('playing') != -1
 
     def play(self):
         if not self.is_playing():
