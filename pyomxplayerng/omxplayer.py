@@ -166,3 +166,6 @@ class OMXPlayer(object):
 
     def _get_properties_interface(self):
         return self.connection.properties_interface
+
+    def quit(self):
+        self._process.wait()

@@ -75,6 +75,16 @@ class OMXPlayerTests(unittest.TestCase):
                                              command_name,
                                              interface_command_name, *args)
 
+    def test_quitting_waits_for_omxplayer_to_die(self, popen):
+        omxplayer_process = Mock()
+        popen.return_value = omxplayer_process
+        self.patch_and_run_omxplayer()
+
+        self.player.quit()
+
+        omxplayer_process.wait.assert_called_once_with()
+
+
     def patch_interface_and_run_command(self, interface_name,
                                         command_name, interface_command_name,
                                         *command_args):
