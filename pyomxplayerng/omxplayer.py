@@ -17,7 +17,7 @@ class OMXPlayer(object):
 
         self.tries = 0
         self._is_playing = True
-        self._process = subprocess.Popen(['omxplayer', filename])
+        self._process = subprocess.call(['omxplayer', filename])
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
         self.pause()
 
