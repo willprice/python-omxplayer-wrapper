@@ -144,8 +144,15 @@ class OMXPlayer(object):
 
     def play_synch(self):
         self.play_pause()
-        while self.playback_status() == 'Playing':
+        while self.is_playing():
             time.sleep(0.05)
+
+    def is_playing(self):
+        return self.playback_status().lower().find('playing') != -1
+
+    def play(self):
+        if not self.is_playing():
+            self.play_pause()
 
     def _get_root_interface(self):
         return self.connection.root_interface

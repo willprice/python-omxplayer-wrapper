@@ -29,7 +29,8 @@ class DBusConnection(object):
     def _create_proxy(self):
         try:
             # introspection fails so it is disabled
-            proxy = self._bus.get_object('org.mpris.MediaPlayer2.omxplayer', '/org/mpris/MediaPlayer2',
+            proxy = self._bus.get_object('org.mpris.MediaPlayer2.omxplayer',
+                                         '/org/mpris/MediaPlayer2',
                                          introspect=False)
             self._create_media_interfaces_on_proxy(proxy)
             return proxy

@@ -29,9 +29,12 @@ class OMXPlayerTests(unittest.TestCase):
         ['has_track_list', 'HasTrackList'],
         ['identity', 'Identity']
     ])
-    def test_root_interface_commands(self, popen, command_name, interface_command_name, *args):
+    def test_root_interface_commands(self, popen, command_name,
+                                     interface_command_name, *args):
         self.patch_and_run_omxplayer()
-        self.patch_interface_and_run_command('_get_root_interface', command_name, interface_command_name, *args)
+        self.patch_interface_and_run_command('_get_root_interface',
+                                             command_name,
+                                             interface_command_name, *args)
 
     @parameterized.expand([
         ['next', 'Next'],
@@ -43,9 +46,12 @@ class OMXPlayerTests(unittest.TestCase):
         ['list_subtitles', 'ListSubtitles'],
         ['action', 'Action', 'p']
     ])
-    def test_player_interface_commands(self, popen, command_name, interface_command_name, *args):
+    def test_player_interface_commands(self, popen, command_name,
+                                       interface_command_name, *args):
         self.patch_and_run_omxplayer()
-        self.patch_interface_and_run_command('_get_player_interface', command_name, interface_command_name, *args)
+        self.patch_interface_and_run_command('_get_player_interface',
+                                             command_name,
+                                             interface_command_name, *args)
 
     @parameterized.expand([
         ['can_go_next', 'CanGoNext'],
@@ -62,18 +68,21 @@ class OMXPlayerTests(unittest.TestCase):
         ['minimum_rate', 'MinimumRate'],
         ['maximum_rate', 'MaximumRate'],
     ])
-    def test_properties_interface_commands(self, popen, command_name, interface_command_name, *args):
+    def test_properties_interface_commands(self, popen, command_name,
+                                           interface_command_name, *args):
         self.patch_and_run_omxplayer()
-        self.patch_interface_and_run_command('_get_properties_interface', command_name, interface_command_name, *args)
-
-
+        self.patch_interface_and_run_command('_get_properties_interface',
+                                             command_name,
+                                             interface_command_name, *args)
 
     def patch_interface_and_run_command(self, interface_name,
-                                        command_name, interface_command_name, *command_args):
+                                        command_name, interface_command_name,
+                                        *command_args):
         with patch.object(self.player, interface_name) as interface:
             self.run_command(command_name, *command_args)
             # generates a call of the form `call().CanQuit`
-            expected_call = getattr(call(), interface_command_name)(*command_args)
+            expected_call = getattr(call(), interface_command_name)(
+                *command_args)
             interface.assert_has_calls(expected_call)
 
     def run_command(self, command_name, *args):
