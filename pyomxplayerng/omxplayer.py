@@ -10,6 +10,11 @@ RETRY_DELAY = 0.05
 
 class OMXPlayer(object):
     def __init__(self, filename, bus_address_finder=None, Connection=None):
+        if not bus_address_finder:
+            bus_address_finder = pyomxplayerng.bus_finder.BusFinder()
+        if not Connection:
+            Connection = DBusConnection
+
         self.tries = 0
         self._is_playing = True
         self._process = subprocess.Popen(['omxplayer', filename])
@@ -17,14 +22,9 @@ class OMXPlayer(object):
         self.pause()
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
-        if not Connection:
-            Connection = DBusConnection
-        if not bus_address_finder:
-            bus_address_finder = pyomxplayerng.bus_finder.BusFinder()
         try:
             return Connection(bus_address_finder.get_address())
-        except DBusConnectionError, IOError:
-            connection = None
+        except (DBusConnectionError, IOError):
             return self.handle_failed_dbus_connection(Connection, bus_address_finder)
 
     def handle_failed_dbus_connection(self, Connection, bus_address_finder):
