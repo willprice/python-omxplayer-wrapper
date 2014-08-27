@@ -1,5 +1,6 @@
 import subprocess
 import time
+import os
 
 import pyomxplayerng.bus_finder
 from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
@@ -17,7 +18,9 @@ class OMXPlayer(object):
 
         self.tries = 0
         self._is_playing = True
-        self._process = subprocess.call(['omxplayer', filename])
+        with open(os.devnull, 'w') as devnull:
+            self._process = subprocess.call(['omxplayer', filename],
+                                            stdout=devnull)
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
         self.pause()
 
