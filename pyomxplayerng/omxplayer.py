@@ -217,5 +217,5 @@ class OMXPlayer(object):
         return self.connection.properties_interface
 
     def quit(self):
-        os.killpg(self._process.pid, signal.SIGTEM)
+        os.killpg(self._process.pid, signal.SIGTERM)
         self._process.wait()
