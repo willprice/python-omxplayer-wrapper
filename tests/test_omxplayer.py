@@ -1,17 +1,21 @@
 import unittest
 
 from nose_parameterized import parameterized
-from mock import patch, Mock, call
+from mock import patch, Mock, call, mock_open
 
 from pyomxplayerng.dbus_connection import DBusConnectionError
 from pyomxplayerng import OMXPlayer
 
+m = mock_open()
+
 
 @patch('subprocess.Popen')
 class OMXPlayerTests(unittest.TestCase):
+    @patch('__builtin__.open', m)
     def test_opens_file_in_omxplayer(self, popen):
         self.patch_and_run_omxplayer()
-        popen.assert_called_once_with(['omxplayer', 'test.mp4'])
+        popen.assert_called_once_with(['omxplayer', 'test.mp4'],
+                                      stdout=m())
 
     @patch('time.sleep')
     def test_tries_to_open_dbus_again_if_it_cant_connect(self, *args):
@@ -84,10 +88,20 @@ class OMXPlayerTests(unittest.TestCase):
 
         omxplayer_process.wait.assert_called_once_with()
 
+    def test_check_process_still_exists_before_dbus_call(self, *args):
+        self.patch_and_run_omxplayer()
+        self.player._process = process = Mock(return_value=None)
+        process.poll.return_value = None
+
+        self.player.can_quit()
+
+        process.poll.assert_called_once_with()
+
 
     def patch_interface_and_run_command(self, interface_name,
                                         command_name, interface_command_name,
                                         *command_args):
+        self.player._process.poll = Mock(return_value=None)
         with patch.object(self.player, interface_name) as interface:
             self.run_command(command_name, *command_args)
             # generates a call of the form `call().CanQuit`
