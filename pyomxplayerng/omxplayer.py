@@ -9,6 +9,7 @@ from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
 
 
 RETRY_DELAY = 0.05
+OMXPLAYER_ARGS = ['--no-osd']
 
 
 class OMXPlayer(object):
@@ -21,7 +22,8 @@ class OMXPlayer(object):
         self.tries = 0
         self._is_playing = True
         with open(os.devnull, 'w') as devnull:
-            self._process = subprocess.Popen(['omxplayer', filename],
+            self._process = subprocess.Popen(
+                ['omxplayer'] + OMXPLAYER_ARGS + [filename],
                                              stdout=devnull,
                                              preexec_fn=os.setsid)
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)

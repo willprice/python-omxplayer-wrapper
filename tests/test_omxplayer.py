@@ -1,10 +1,13 @@
 import unittest
+import os
 
 from nose_parameterized import parameterized
 from mock import patch, Mock, call, mock_open
 
 from pyomxplayerng.dbus_connection import DBusConnectionError
 from pyomxplayerng import OMXPlayer
+from pyomxplayerng.omxplayer import OMXPLAYER_ARGS
+
 
 m = mock_open()
 
@@ -14,8 +17,9 @@ class OMXPlayerTests(unittest.TestCase):
     @patch('__builtin__.open', m)
     def test_opens_file_in_omxplayer(self, popen):
         self.patch_and_run_omxplayer()
-        popen.assert_called_once_with(['omxplayer', 'test.mp4'],
-                                      stdout=m())
+        popen.assert_called_once_with(
+            ['omxplayer'] + OMXPLAYER_ARGS + ['test.mp4'],
+            preexec_fn=os.setsid, stdout=m())
 
     @patch('time.sleep')
     def test_tries_to_open_dbus_again_if_it_cant_connect(self, *args):
@@ -84,7 +88,8 @@ class OMXPlayerTests(unittest.TestCase):
         popen.return_value = omxplayer_process
         self.patch_and_run_omxplayer()
 
-        self.player.quit()
+        with patch('pyomxplayerng.omxplayer.os'):
+            self.player.quit()
 
         omxplayer_process.wait.assert_called_once_with()
 
