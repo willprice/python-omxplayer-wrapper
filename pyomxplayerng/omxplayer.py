@@ -1,6 +1,7 @@
 import subprocess
 import time
 import os
+import signal
 from functools import wraps
 
 import pyomxplayerng.bus_finder
@@ -21,7 +22,8 @@ class OMXPlayer(object):
         self._is_playing = True
         with open(os.devnull, 'w') as devnull:
             self._process = subprocess.Popen(['omxplayer', filename],
-                                            stdout=devnull)
+                                             stdout=devnull,
+                                             preexec_fn=os.setsid)
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
         self.pause()
 
@@ -215,5 +217,5 @@ class OMXPlayer(object):
         return self.connection.properties_interface
 
     def quit(self):
-        self._process.terminate()
+        os.killpg(self._process.pid, signal.SIGTEM)
         self._process.wait()
