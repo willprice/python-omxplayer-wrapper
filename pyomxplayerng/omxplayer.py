@@ -21,13 +21,16 @@ class OMXPlayer(object):
 
         self.tries = 0
         self._is_playing = True
-        with open(os.devnull, 'w') as devnull:
-            self._process = subprocess.Popen(
-                ['omxplayer'] + OMXPLAYER_ARGS + [filename],
-                                             stdout=devnull,
-                                             preexec_fn=os.setsid)
+        self._process = self.setup_omxplayer_process(filename)
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
         self.pause()
+
+    def setup_omxplayer_process(self, filename):
+        with open(os.devnull, 'w') as devnull:
+            return subprocess.Popen(
+                ['omxplayer'] + OMXPLAYER_ARGS + [filename],
+                stdout=devnull,
+                preexec_fn=os.setsid)
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
         try:
@@ -167,9 +170,9 @@ class OMXPlayer(object):
         """
         Toggles playing state.
         """
+        self._is_playing = not self._is_playing
         self._get_player_interface().Pause()
 
-    @check_player_is_active
     def play_pause(self):
         self.pause()
 
@@ -200,7 +203,7 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def play_synch(self):
-        self.play_pause()
+        self.play()
         while self.is_playing():
             time.sleep(0.05)
 
