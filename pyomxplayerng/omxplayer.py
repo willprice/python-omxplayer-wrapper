@@ -2,7 +2,12 @@ import subprocess
 import time
 import os
 import signal
+import logging
 from functools import wraps
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 import pyomxplayerng.bus_finder
 from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
@@ -14,6 +19,7 @@ OMXPLAYER_ARGS = ['--no-osd']
 
 class OMXPlayer(object):
     def __init__(self, filename, bus_address_finder=None, Connection=None):
+        logger.debug('Instantiating OMXPlayer')
         if not bus_address_finder:
             bus_address_finder = pyomxplayerng.bus_finder.BusFinder()
         if not Connection:
@@ -27,19 +33,27 @@ class OMXPlayer(object):
 
     def setup_omxplayer_process(self, filename):
         with open(os.devnull, 'w') as devnull:
+            logger.debug('Setting up OMXPlayer process')
             return subprocess.Popen(
                 ['omxplayer'] + OMXPLAYER_ARGS + [filename],
                 stdout=devnull,
                 preexec_fn=os.setsid)
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
+        logger.debug('Connecting to DBus')
         try:
-            return Connection(bus_address_finder.get_address())
+            connection = Connection(bus_address_finder.get_address())
+            logger.debug('Connected to DBus at address: {}'.format(
+                connection
+            ))
+            return connection
+
         except (DBusConnectionError, IOError):
             return self.handle_failed_dbus_connection(Connection, bus_address_finder)
 
     def handle_failed_dbus_connection(self, Connection, bus_address_finder):
         if self.tries < 50:
+            logger.debug('DBus connect attempt: {}'.format(self.tries))
             self.tries += 1
             time.sleep(RETRY_DELAY)
             return self.setup_dbus_connection(Connection, bus_address_finder)
@@ -52,10 +66,11 @@ class OMXPlayer(object):
         # wraps is a decorator that improves debugging wrapped methods
         @wraps(fn)
         def wrapped(self, *args, **kwargs):
+            logger.debug('Checking if process is still alive')
             if self._process.poll() == None:
                 return fn(self, *args, **kwargs)
             else:
-                print "Player is not active"
+                logger.info('Process is no longer alive, can\'t run command')
 
         return wrapped
 
@@ -222,5 +237,7 @@ class OMXPlayer(object):
         return self.connection.properties_interface
 
     def quit(self):
+        logger.info('Quitting OMXPlayer')
         os.killpg(self._process.pid, signal.SIGTERM)
+        logger.info('Sent to ')
         self._process.wait()
