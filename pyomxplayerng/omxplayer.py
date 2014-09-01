@@ -239,5 +239,5 @@ class OMXPlayer(object):
     def quit(self):
         logger.info('Quitting OMXPlayer')
         os.killpg(self._process.pid, signal.SIGTERM)
-        logger.info('Sent to ')
+        logger.info('SIGTEM Sent to pid: %s' % self._process.pid)
         self._process.wait()
