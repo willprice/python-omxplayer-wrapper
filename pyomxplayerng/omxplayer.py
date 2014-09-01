@@ -20,6 +20,7 @@ OMXPLAYER_ARGS = ['--no-osd']
 class OMXPlayer(object):
     def __init__(self, filename, bus_address_finder=None, Connection=None):
         logger.debug('Instantiating OMXPlayer')
+
         if not bus_address_finder:
             bus_address_finder = pyomxplayerng.bus_finder.BusFinder()
         if not Connection:

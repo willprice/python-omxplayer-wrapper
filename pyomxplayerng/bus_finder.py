@@ -1,7 +1,8 @@
 class BusFinder(object):
     def __init__(self, path='/tmp/omxplayerdbus'):
-        with open(path, 'r') as f:
-            self.address = f.read().strip()
+        self.path = path
 
     def get_address(self):
+        with open(self.path, 'r') as f:
+            self.address = f.read().strip()
         return self.address
