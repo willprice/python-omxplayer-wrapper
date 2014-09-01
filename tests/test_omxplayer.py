@@ -91,7 +91,7 @@ class OMXPlayerTests(unittest.TestCase):
         with patch('pyomxplayerng.omxplayer.os'):
             self.player.quit()
 
-        omxplayer_process.wait.assert_called_once_with()
+        omxplayer_process.wait.assert_any_call()
 
     def test_check_process_still_exists_before_dbus_call(self, *args):
         self.patch_and_run_omxplayer()

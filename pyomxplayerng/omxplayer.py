@@ -5,6 +5,8 @@ import signal
 import logging
 from functools import wraps
 
+from dbus import DBusException
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,6 +17,8 @@ from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
 
 RETRY_DELAY = 0.05
 OMXPLAYER_ARGS = ['--no-osd']
+
+import threading
 
 
 class OMXPlayer(object):
@@ -32,13 +36,29 @@ class OMXPlayer(object):
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
         self.pause()
 
+    def run_omxplayer(self, devnull, filename):
+        def on_exit():
+            logger.info("OMXPlayer process is dead, all DBus calls from here "
+                        "will fail")
+
+        def monitor(process, on_exit):
+            process.wait()
+            on_exit()
+
+        process = subprocess.Popen(
+            ['omxplayer'] + OMXPLAYER_ARGS + [filename],
+            stdout=devnull,
+            preexec_fn=os.setsid)
+
+        m = threading.Thread(target=monitor, args=(process, on_exit))
+        m.start()
+        return process
+
     def setup_omxplayer_process(self, filename):
         with open(os.devnull, 'w') as devnull:
             logger.debug('Setting up OMXPlayer process')
-            return subprocess.Popen(
-                ['omxplayer'] + OMXPLAYER_ARGS + [filename],
-                stdout=devnull,
-                preexec_fn=os.setsid)
+            process = self.run_omxplayer(devnull, filename)
+            return process
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Connecting to DBus')
@@ -214,14 +234,20 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def is_playing(self):
-        self._is_playing = self.playback_status().lower().find('playing') != -1
+        self._is_playing = self.playback_status() == "Playing"
+        logger.info("Playing?: %s" % self._is_playing)
         return self._is_playing
 
     @check_player_is_active
     def play_synch(self):
         self.play()
-        while self.is_playing():
+        logger.info("Playing synchronously")
+        try:
             time.sleep(0.05)
+            while self.is_playing():
+                time.sleep(0.05)
+        except DBusException:
+            logger.info("DBus timed out :(")
 
     @check_player_is_active
     def play(self):
@@ -240,5 +266,5 @@ class OMXPlayer(object):
     def quit(self):
         logger.info('Quitting OMXPlayer')
         os.killpg(self._process.pid, signal.SIGTERM)
-        logger.info('SIGTEM Sent to pid: %s' % self._process.pid)
+        logger.info('SIGTERM Sent to pid: %s' % self._process.pid)
         self._process.wait()
