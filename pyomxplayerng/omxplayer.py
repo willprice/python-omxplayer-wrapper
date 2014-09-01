@@ -239,7 +239,7 @@ class OMXPlayer(object):
         return self._is_playing
 
     @check_player_is_active
-    def play_synch(self):
+    def play_sync(self):
         self.play()
         logger.info("Playing synchronously")
         try:
