@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='pyomxplayer',
+    name='omxplayer',
 
     author='Will Price',
     author_email='will.price94+py@gmail.com',
@@ -13,7 +13,7 @@ setup(
 
     license='GPL',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Multimedia :: Video',
         'Programming Lnaguage :: Python :: 2'
@@ -21,6 +21,6 @@ setup(
 
     keywords='omxplayer, raspberry_pi, library',
 
-    packages=['pyomxplayerng'],
+    packages=['omxplayer'],
     install_requires=[],
 )

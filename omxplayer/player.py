@@ -11,8 +11,8 @@ from dbus import DBusException
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-import pyomxplayerng.bus_finder
-from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
+import omxplayer.bus_finder
+from omxplayer.dbus_connection import DBusConnection, DBusConnectionError
 
 
 RETRY_DELAY = 0.05
@@ -26,7 +26,7 @@ class OMXPlayer(object):
         logger.debug('Instantiating OMXPlayer')
 
         if not bus_address_finder:
-            bus_address_finder = pyomxplayerng.bus_finder.BusFinder()
+            bus_address_finder = omxplayer.bus_finder.BusFinder()
         if not Connection:
             Connection = DBusConnection
 

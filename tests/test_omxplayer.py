@@ -4,9 +4,9 @@ import os
 from nose_parameterized import parameterized
 from mock import patch, Mock, call, mock_open
 
-from pyomxplayerng.dbus_connection import DBusConnectionError
-from pyomxplayerng import OMXPlayer
-from pyomxplayerng.omxplayer import OMXPLAYER_ARGS
+from omxplayer.dbus_connection import DBusConnectionError
+from omxplayer.player import OMXPlayer
+from omxplayer.player import OMXPLAYER_ARGS
 
 
 m = mock_open()
@@ -88,7 +88,7 @@ class OMXPlayerTests(unittest.TestCase):
         popen.return_value = omxplayer_process
         self.patch_and_run_omxplayer()
 
-        with patch('pyomxplayerng.omxplayer.os'):
+        with patch('omxplayer.player.os'):
             self.player.quit()
 
         omxplayer_process.wait.assert_any_call()

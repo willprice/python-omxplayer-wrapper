@@ -6,6 +6,7 @@ class DBusConnectionError(Exception):
     """
     pass
 
+
 class DBusConnection(object):
     """
     Attributes:
@@ -39,8 +40,10 @@ class DBusConnection(object):
 
     def _create_media_interfaces_on_proxy(self, proxy):
         self.root_interface = self._interface(proxy, 'org.mpris.MediaPlayer2')
-        self.player_interface = self._interface(proxy, 'org.mpris.MediaPlayer2.Player')
-        self.properties_interface = self._interface(proxy, 'org.freedesktop.DBus.Properties')
+        self.player_interface = self._interface(proxy,
+                                                'org.mpris.MediaPlayer2.Player')
+        self.properties_interface = self._interface(proxy,
+                                                    'org.freedesktop.DBus.Properties')
 
     def _interface(self, proxy, interface):
         return dbus.Interface(proxy, interface)
