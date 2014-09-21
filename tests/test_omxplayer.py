@@ -12,10 +12,11 @@ from omxplayer.player import OMXPLAYER_ARGS
 m = mock_open()
 
 
+@patch('time.sleep')
 @patch('subprocess.Popen')
 class OMXPlayerTests(unittest.TestCase):
     @patch('__builtin__.open', m)
-    def test_opens_file_in_omxplayer(self, popen):
+    def test_opens_file_in_omxplayer(self, popen, *args):
         self.patch_and_run_omxplayer()
         popen.assert_called_once_with(
             ['omxplayer'] + OMXPLAYER_ARGS + ['test.mp4'],
@@ -37,7 +38,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['has_track_list', 'HasTrackList'],
         ['identity', 'Identity']
     ])
-    def test_root_interface_commands(self, popen, command_name,
+    def test_root_interface_commands(self, popen, sleep, command_name,
                                      interface_command_name, *args):
         self.patch_and_run_omxplayer()
         self.patch_interface_and_run_command('_get_root_interface',
@@ -54,7 +55,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['list_subtitles', 'ListSubtitles'],
         ['action', 'Action', 'p']
     ])
-    def test_player_interface_commands(self, popen, command_name,
+    def test_player_interface_commands(self, popen, sleep, command_name,
                                        interface_command_name, *args):
         self.patch_and_run_omxplayer()
         self.patch_interface_and_run_command('_get_player_interface',
@@ -76,14 +77,14 @@ class OMXPlayerTests(unittest.TestCase):
         ['minimum_rate', 'MinimumRate'],
         ['maximum_rate', 'MaximumRate'],
     ])
-    def test_properties_interface_commands(self, popen, command_name,
+    def test_properties_interface_commands(self, popen, sleep, command_name,
                                            interface_command_name, *args):
         self.patch_and_run_omxplayer()
         self.patch_interface_and_run_command('_get_properties_interface',
                                              command_name,
                                              interface_command_name, *args)
 
-    def test_quitting_waits_for_omxplayer_to_die(self, popen):
+    def test_quitting_waits_for_omxplayer_to_die(self, popen, *args):
         omxplayer_process = Mock()
         popen.return_value = omxplayer_process
         self.patch_and_run_omxplayer()
