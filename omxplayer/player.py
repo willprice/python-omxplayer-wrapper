@@ -33,8 +33,8 @@ class OMXPlayer(object):
         self.tries = 0
         self._is_playing = True
         self._process = self.setup_omxplayer_process(filename)
-        time.sleep(0.2)
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
+        time.sleep(0.2)  # Wait for the DBus interface to be initialised
         self.pause()
 
     def run_omxplayer(self, devnull, filename):
