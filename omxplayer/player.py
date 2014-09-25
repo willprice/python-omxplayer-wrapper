@@ -59,15 +59,15 @@ class OMXPlayer(object):
         with open(os.devnull, 'w') as devnull:
             logger.debug('Setting up OMXPlayer process')
             process = self.run_omxplayer(devnull, filename)
+            logger.debug('Process opened with PID %s' % process.pid)
             return process
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
-        logger.debug('Connecting to DBus')
+        logger.debug('Trying to connect to OMXPlayer via DBus')
         try:
             connection = Connection(bus_address_finder.get_address())
-            logger.debug('Connected to DBus at address: {}'.format(
-                connection
-            ))
+            logger.debug(
+                'Connected to OMXPlayer at DBus address: %s' % connection)
             return connection
 
         except (DBusConnectionError, IOError):
@@ -89,7 +89,9 @@ class OMXPlayer(object):
         @wraps(fn)
         def wrapped(self, *args, **kwargs):
             logger.debug('Checking if process is still alive')
-            if self._process.poll() == None:
+            if self._process.poll() is None:
+                logger.debug('OMXPlayer is running, so execute %s' %
+                             fn.__name__)
                 return fn(self, *args, **kwargs)
             else:
                 logger.info('Process is no longer alive, can\'t run command')
