@@ -8,7 +8,7 @@ from functools import wraps
 from dbus import DBusException
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 import omxplayer.bus_finder
