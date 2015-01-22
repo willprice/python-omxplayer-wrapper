@@ -9,7 +9,7 @@ A completely rewritten version of PyOMXPlayer utilising `OMXPlayer`'s `DBus` int
 WARNING: Don't have an RPi to test this at the moment, please report an issue if this doesn't work!
 
 ```python
-from pyomxplayerng import OMXPlayer
+from omxplayer import OMXPlayer
 from time import sleep
 
 # This will start an `omxplayer` process, this might 
