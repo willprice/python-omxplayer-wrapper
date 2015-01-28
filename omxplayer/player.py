@@ -64,23 +64,19 @@ class OMXPlayer(object):
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Trying to connect to OMXPlayer via DBus')
-        try:
-            connection = Connection(bus_address_finder.get_address())
-            logger.debug(
-                'Connected to OMXPlayer at DBus address: %s' % connection)
-            return connection
+        while self.tries < 50:
+            try:
+                connection = Connection(bus_address_finder.get_address())
+                logger.debug(
+                    'Connected to OMXPlayer at DBus address: %s' % connection)
+                return connection
 
-        except (DBusConnectionError, IOError):
-            return self.handle_failed_dbus_connection(Connection, bus_address_finder)
+            except (DBusConnectionError, IOError):
+                logger.debug('DBus connect attempt: {}'.format(self.tries))
+                self.tries += 1
+                time.sleep(RETRY_DELAY)
+        raise SystemError('DBus cannot connect to the OMXPlayer process')
 
-    def handle_failed_dbus_connection(self, Connection, bus_address_finder):
-        if self.tries < 50:
-            logger.debug('DBus connect attempt: {}'.format(self.tries))
-            self.tries += 1
-            time.sleep(RETRY_DELAY)
-            return self.setup_dbus_connection(Connection, bus_address_finder)
-        else:
-            raise SystemError('DBus cannot connect to the OMXPlayer process')
 
     """ Utilities """
 
@@ -247,8 +243,11 @@ class OMXPlayer(object):
         logger.info("Playing synchronously")
         try:
             time.sleep(0.05)
+            logger.debug("Wait for playing to start")
             while self.is_playing():
+                logger.debug("STATE: Playing")
                 time.sleep(0.05)
+            logger.debug("STATE: Not playing")
         except DBusException:
             logger.info("DBus timed out :(")
 
@@ -267,7 +266,7 @@ class OMXPlayer(object):
         return self.connection.properties_interface
 
     def quit(self):
-        logger.info('Quitting OMXPlayer')
+        logger.debug('Quitting OMXPlayer')
         os.killpg(self._process.pid, signal.SIGTERM)
-        logger.info('SIGTERM Sent to pid: %s' % self._process.pid)
+        logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
         self._process.wait()
