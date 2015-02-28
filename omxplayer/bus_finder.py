@@ -16,9 +16,11 @@ class BusFinder(object):
         with open(self.path, 'r') as f:
             logger.debug('Opened file at %s' % self.path)
             self.address = f.read().strip()
-            logger.debug('Address \'%s\' parsed from file' % self.path)
+            logger.debug('Address \'%s\' parsed from file' % self.address)
         return self.address
 
     def wait_for_file(self):
         while not os.path.isfile(self.path):
+            time.sleep(0.05)
+        while not os.path.getsize(self.path):
             time.sleep(0.05)
