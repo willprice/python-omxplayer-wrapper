@@ -224,6 +224,14 @@ class OMXPlayer(object):
         self._get_player_interface().SetPosition(position_us)
 
     @check_player_is_active
+    def list_video(self):
+        return map(str, self._get_player_interface().ListVideo())
+
+    @check_player_is_active
+    def list_audio(self):
+        return map(str, self._get_player_interface().ListAudio())
+
+    @check_player_is_active
     def list_subtitles(self):
         return map(str, self._get_player_interface().ListSubtitles())
 
