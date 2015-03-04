@@ -4,8 +4,9 @@ import os
 import signal
 import logging
 from functools import wraps
+from glob import glob
 
-from dbus import DBusException
+from dbus import DBusException, Int64, ObjectPath
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,14 +17,16 @@ from omxplayer.dbus_connection import DBusConnection, DBusConnectionError
 
 
 RETRY_DELAY = 0.05
-OMXPLAYER_ARGS = ['--no-osd']
+OMXPLAYER_ARGS = []
 
 import threading
 
 
 class OMXPlayer(object):
-    def __init__(self, filename, bus_address_finder=None, Connection=None):
+    def __init__(self, filename, args=(), bus_address_finder=None, Connection=None):
         logger.debug('Instantiating OMXPlayer')
+
+        OMXPLAYER_ARGS.extend(args)
 
         if not bus_address_finder:
             bus_address_finder = omxplayer.bus_finder.BusFinder()
@@ -63,6 +66,10 @@ class OMXPlayer(object):
             return process
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
+        logger.debug('Cleaning up existing dbus files')
+        for dbus_file in glob('/tmp/omxplayerdbus.*'):
+            os.remove(dbus_file)
+
         logger.debug('Trying to connect to OMXPlayer via DBus')
         while self.tries < 50:
             try:
@@ -217,11 +224,11 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def seek(self, relative_position_us):
-        self._get_player_interface().Seek(relative_position_us)
+        self._get_player_interface().Seek(Int64(relative_position_us))
 
     @check_player_is_active
     def set_position(self, position_us):
-        self._get_player_interface().SetPosition(position_us)
+        self._get_player_interface().SetPosition(ObjectPath('/not/used', variant_level=0), Int64(position_us))
 
     @check_player_is_active
     def list_video(self):
