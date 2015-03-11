@@ -1,5 +1,5 @@
 
-# PyOMXPlayer-ng
+# Python OMXPlayer wrapper
 
 > Control OMXPlayer from Python on the Raspberry Pi.
 
