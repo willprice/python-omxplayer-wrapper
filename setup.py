@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='omxplayer',
+    name='omxplayer-wrapper',
 
     author='Will Price',
     author_email='will.price94+py@gmail.com',
@@ -11,7 +11,7 @@ setup(
     description='Control OMXPlayer on the Raspberry Pi',
     long_description='Control OMXPlayer on the Raspberry Pi through DBus',
 
-    license='GPL',
+    license='LGPL',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
