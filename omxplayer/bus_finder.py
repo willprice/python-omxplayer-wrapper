@@ -20,25 +20,30 @@ class BusFinder(object):
             logger.debug('Address \'%s\' parsed from file' % self.address)
         return self.address
 
-    def wait_for_file(self):
-        if self.path:
-            # Wait for the given path to exist.
-            while not os.path.isfile(self.path):
-                time.sleep(0.5)
-        else:
-            dbus_files = []
+    def find_address_file(self):
+        dbus_files = []
+        while not dbus_files:
+            # filter is used here as glob doesn't support regexp :(
+            isnt_pid_file = lambda path: not path.endswith('.pid')
+            possible_address_files = glob('/tmp/omxplayerdbus.*')
+            possible_address_files = filter(isnt_pid_file,
+                                            possible_address_files)
+            possible_address_files.sort(key=lambda path: os.path.getmtime(path))
+            time.sleep(0.5)
 
-            # Wait for the files to exist.
-            while not dbus_files:
-                # Get a list of /tmp/omxplayerdbus.* files sorted by m-time.
-                dbus_files = filter(lambda path: not path.endswith('.pid'),
-                                    glob('/tmp/omxplayerdbus.*'))
-                dbus_files.sort(key=lambda path: os.path.getmtime(path))
-                time.sleep(0.5)
+        self.path = dbus_files[-1]
 
-            # Pick the most recent /tmp/omxplayerdbus.* file.
-            self.path = dbus_files[-1]
+    def wait_for_path_to_exist(self):
+        while not os.path.isfile(self.path):
+            time.sleep(0.5)
 
-        # Once the file exists, wait until it has data.
+    def wait_for_dbus_address_to_be_written_to_file(self):
         while not os.path.getsize(self.path):
             time.sleep(0.5)
+
+    def wait_for_file(self):
+        if self.path:
+            self.wait_for_path_to_exist()
+        else:
+            self.find_address_file()
+        self.wait_for_dbus_address_to_be_written_to_file()

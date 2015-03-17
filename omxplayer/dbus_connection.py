@@ -6,7 +6,6 @@ class DBusConnectionError(Exception):
     """
     pass
 
-
 class DBusConnection(object):
     """
     Attributes:
