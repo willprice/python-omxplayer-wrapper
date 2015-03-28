@@ -7,8 +7,12 @@ logger = getLogger(__name__)
 
 
 class BusFinder(object):
+    def __init__(self):
+        self.path = None
+
     def get_address(self):
         self.wait_for_file()
+        self.find_address_file()
         logger.debug('Opening file at %s' % self.path)
         with open(self.path, 'r') as f:
             logger.debug('Opened file at %s' % self.path)
