@@ -7,9 +7,8 @@ logger = getLogger(__name__)
 
 
 class BusFinder(object):
-    def __init__(self, path=None):
-        self.path = path
-        logger.debug('BusFinder initialised with path: %s' % path)
+    def __init__(self):
+        self.path = self.find_address_file()
 
     def get_address(self):
         self.wait_for_file()
@@ -31,7 +30,7 @@ class BusFinder(object):
             possible_address_files.sort(key=lambda path: os.path.getmtime(path))
             time.sleep(0.5)
 
-        self.path = dbus_files[-1]
+        return dbus_files[-1]
 
     def wait_for_path_to_exist(self):
         while not os.path.isfile(self.path):
