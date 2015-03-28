@@ -20,8 +20,8 @@ class BusFinder(object):
         return self.address
 
     def find_address_file(self):
-        dbus_files = []
-        while not dbus_files:
+        possible_address_files = []
+        while not possible_address_files:
             # filter is used here as glob doesn't support regexp :(
             isnt_pid_file = lambda path: not path.endswith('.pid')
             possible_address_files = glob('/tmp/omxplayerdbus.*')
@@ -30,7 +30,7 @@ class BusFinder(object):
             possible_address_files.sort(key=lambda path: os.path.getmtime(path))
             time.sleep(0.5)
 
-        return dbus_files[-1]
+        return possible_address_files[-1]
 
     def wait_for_path_to_exist(self):
         while not os.path.isfile(self.path):
