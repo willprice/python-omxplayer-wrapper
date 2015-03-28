@@ -7,9 +7,6 @@ logger = getLogger(__name__)
 
 
 class BusFinder(object):
-    def __init__(self):
-        self.path = self.find_address_file()
-
     def get_address(self):
         self.wait_for_file()
         logger.debug('Opening file at %s' % self.path)
@@ -20,6 +17,11 @@ class BusFinder(object):
         return self.address
 
     def find_address_file(self):
+        """
+        Finds the OMXPlayer DBus connection
+        Assumes there is an alive OMXPlayer process.
+        :return:
+        """
         possible_address_files = []
         while not possible_address_files:
             # filter is used here as glob doesn't support regexp :(
@@ -30,7 +32,7 @@ class BusFinder(object):
             possible_address_files.sort(key=lambda path: os.path.getmtime(path))
             time.sleep(0.5)
 
-        return possible_address_files[-1]
+        self.path = possible_address_files[-1]
 
     def wait_for_path_to_exist(self):
         while not os.path.isfile(self.path):
