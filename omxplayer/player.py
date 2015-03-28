@@ -22,7 +22,8 @@ import threading
 
 
 class OMXPlayer(object):
-    def __init__(self, filename, args=(), bus_address_finder=None, Connection=None):
+    def __init__(self, filename,
+                 args=[], bus_address_finder=None, Connection=None):
         logger.debug('Instantiating OMXPlayer')
 
         self.args = args
