@@ -3,7 +3,7 @@ import time
 import os
 import signal
 import logging
-from functools import wraps
+from functools import wraps, reduce
 from glob import glob
 
 from dbus import DBusException, Int64, ObjectPath
@@ -17,7 +17,6 @@ from omxplayer.dbus_connection import DBusConnection, DBusConnectionError
 
 
 RETRY_DELAY = 0.05
-OMXPLAYER_ARGS = []
 
 import threading
 
@@ -26,7 +25,7 @@ class OMXPlayer(object):
     def __init__(self, filename, args=(), bus_address_finder=None, Connection=None):
         logger.debug('Instantiating OMXPlayer')
 
-        OMXPLAYER_ARGS.extend(args)
+        self.args = args
 
         if not bus_address_finder:
             bus_address_finder = omxplayer.bus_finder.BusFinder()
@@ -49,8 +48,10 @@ class OMXPlayer(object):
             process.wait()
             on_exit()
 
+        command = ['omxplayer'] + self.args + [filename]
+        logger.debug("Opening omxplayer with the command: %s" % command)
         process = subprocess.Popen(
-            ['omxplayer'] + OMXPLAYER_ARGS + [filename],
+            command,
             stdout=devnull,
             preexec_fn=os.setsid)
 
@@ -287,4 +288,4 @@ class OMXPlayer(object):
         except OSError:
             logger.debug('Could not find the process to kill')
         logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
-        self._process.wait()
+
