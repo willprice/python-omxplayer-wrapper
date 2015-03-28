@@ -74,6 +74,7 @@ class OMXPlayer(object):
 
         logger.debug('Trying to connect to OMXPlayer via DBus')
         while self.tries < 50:
+            logger.debug('DBus connect attempt: {}'.format(self.tries))
             try:
                 connection = Connection(bus_address_finder.get_address())
                 logger.debug(
@@ -81,7 +82,7 @@ class OMXPlayer(object):
                 return connection
 
             except (DBusConnectionError, IOError):
-                logger.debug('DBus connect attempt: {}'.format(self.tries))
+                logger.debug('Failed to connect to OMXPlayer DBus address')
                 self.tries += 1
                 time.sleep(RETRY_DELAY)
         raise SystemError('DBus cannot connect to the OMXPlayer process')
