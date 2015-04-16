@@ -34,17 +34,17 @@ class BusFinder(object):
             possible_address_files = filter(isnt_pid_file,
                                             possible_address_files)
             possible_address_files.sort(key=lambda path: os.path.getmtime(path))
-            time.sleep(0.5)
+            time.sleep(0.05)
 
         self.path = possible_address_files[-1]
 
     def wait_for_path_to_exist(self):
         while not os.path.isfile(self.path):
-            time.sleep(0.5)
+            time.sleep(0.05)
 
     def wait_for_dbus_address_to_be_written_to_file(self):
         while not os.path.getsize(self.path):
-            time.sleep(0.5)
+            time.sleep(0.05)
 
     def wait_for_file(self):
         if self.path:
