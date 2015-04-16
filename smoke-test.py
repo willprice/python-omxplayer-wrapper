@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-from ..omxplayer import OMXPlayer
+from omxplayer import OMXPlayer
 from time import sleep
 
 vid = OMXPlayer('../chocolate-adventure/media/temple.mkv')
