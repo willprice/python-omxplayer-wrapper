@@ -6,7 +6,7 @@ logger = getLogger(__name__)
 
 
 class BusFinder(object):
-    def __init__(self, path='/tmp/omxplayerdbus.root'):
+    def __init__(self, path='/tmp/omxplayerdbus.pi'):
         self.path = path
         logger.debug('BusFinder initialised with path: %s' % path)
 
@@ -20,7 +20,9 @@ class BusFinder(object):
         return self.address
 
     def wait_for_file(self):
+        logger.debug('Waiting for file to become available')
         while not os.path.isfile(self.path):
             time.sleep(0.05)
-        while not os.path.getsize(self.path):
+        logger.debug('Waiting for file to become readable')
+        while os.path.getsize(self.path) <= 0:
             time.sleep(0.05)

@@ -4,6 +4,7 @@ import os
 import signal
 import logging
 import threading
+import glob
 from functools import wraps
 from dbus import DBusException
 
@@ -20,6 +21,16 @@ RETRY_DELAY = 0.05
 OMXPLAYER_ARGS = ['--no-osd']
 
 
+class FileCleaner(object):
+    def __init__(self, path):
+        self.path = path
+
+    def clean(self):
+        for file in glob.glob(self.path):
+            os.remove(file)
+
+
+
 class OMXPlayer(object):
     """
     OMXPlayer controller
@@ -30,6 +41,7 @@ class OMXPlayer(object):
     """
     def __init__(self, filename, bus_address_finder=None, Connection=None):
         logger.debug('Instantiating OMXPlayer')
+        self.clean_old_files()
 
         if not bus_address_finder:
             bus_address_finder = omxplayer.bus_finder.BusFinder()
@@ -42,6 +54,11 @@ class OMXPlayer(object):
         self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
         time.sleep(0.5)  # Wait for the DBus interface to be initialised
         self.pause()
+
+    def clean_old_files(self):
+        logger.debug("Removing old OMXPlayer pid files etc")
+        cleaner = FileCleaner('/tmp/*omxplayer*')
+        cleaner.clean()
 
     def run_omxplayer(self, devnull, filename):
         def on_exit():
@@ -233,6 +250,7 @@ class OMXPlayer(object):
     @check_player_is_active
     def play_pause(self):
         self._get_player_interface().PlayPause()
+        self._is_playing = not self._is_playing
 
     @check_player_is_active
     def stop(self):
@@ -276,7 +294,8 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def play(self):
-            self.connection.player_interface.Play()
+        if not self.is_playing():
+            self.play_pause()
 
     def _get_root_interface(self):
         return self.connection.root_interface

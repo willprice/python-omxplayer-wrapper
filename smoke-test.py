@@ -12,4 +12,4 @@ vid.pause()
 sleep(2)
 
 print("Exit")
-vid.exit()
+vid.quit()
