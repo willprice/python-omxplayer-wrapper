@@ -83,7 +83,7 @@ class OMXPlayer(object):
 
     """ Utilities """
 
-    def check_player_is_active(self, fn):
+    def check_player_is_active(fn):
         @wraps(fn)
         def wrapped(self, *args, **kwargs):
             logger.debug('Checking if process is still alive')
