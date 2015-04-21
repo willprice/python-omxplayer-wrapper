@@ -5,7 +5,7 @@ import signal
 import logging
 from functools import wraps
 
-from dbus import DBusException
+from dbus import DBusException, ObjectPath
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,15 +16,19 @@ from omxplayer.dbus_connection import DBusConnection, DBusConnectionError
 
 
 RETRY_DELAY = 0.05
-OMXPLAYER_ARGS = ['--no-osd']
 
 import threading
 
 
 class OMXPlayer(object):
-    def __init__(self, filename, bus_address_finder=None, Connection=None):
-        logger.debug('Instantiating OMXPlayer')
 
+    def __init__(self, filename, bus_address_finder=None, Connection=None, logfile=False, extra_args=None):
+        logger.debug('Instantiating OMXPlayer')
+        self.args = ['--no-osd']
+        if logfile:
+            self.args.append('-g')
+        if extra_args:
+            self.args = self.args + extra_args
         if not bus_address_finder:
             bus_address_finder = omxplayer.bus_finder.BusFinder()
         if not Connection:
@@ -39,17 +43,17 @@ class OMXPlayer(object):
 
     def run_omxplayer(self, devnull, filename):
         def on_exit():
-            logger.info("OMXPlayer process is dead, all DBus calls from here "
-                        "will fail")
+            logger.info("OMXPlayer process is dead, all DBus calls from here will fail")
 
         def monitor(process, on_exit):
             process.wait()
             on_exit()
 
         process = subprocess.Popen(
-            ['omxplayer'] + OMXPLAYER_ARGS + [filename],
+            ['omxplayer'] + self.args + [filename],
             stdout=devnull,
-            preexec_fn=os.setsid)
+            preexec_fn=os.setsid
+        )
 
         m = threading.Thread(target=monitor, args=(process, on_exit))
         m.start()
@@ -67,8 +71,7 @@ class OMXPlayer(object):
         while self.tries < 50:
             try:
                 connection = Connection(bus_address_finder.get_address())
-                logger.debug(
-                    'Connected to OMXPlayer at DBus address: %s' % connection)
+                logger.debug('Connected to OMXPlayer at DBus address: %s' % connection)
                 return connection
 
             except (DBusConnectionError, IOError):
@@ -81,13 +84,11 @@ class OMXPlayer(object):
     """ Utilities """
 
     def check_player_is_active(fn):
-        # wraps is a decorator that improves debugging wrapped methods
         @wraps(fn)
         def wrapped(self, *args, **kwargs):
             logger.debug('Checking if process is still alive')
             if self._process.poll() is None:
-                logger.debug('OMXPlayer is running, so execute %s' %
-                             fn.__name__)
+                logger.debug('OMXPlayer is running, so execute %s' % fn.__name__)
                 return fn(self, *args, **kwargs)
             else:
                 logger.info('Process is no longer alive, can\'t run command')
@@ -191,6 +192,34 @@ class OMXPlayer(object):
         return float(self._get_properties_interface().MaximumRate())
 
     """ PLAYER INTERFACE METHODS """
+
+    def _fade(self, method='in', step=2):
+        """
+        Fades the video transparency from 0 to 255 or 255 to 0 according to the method used
+        The step parameter is used to define the speed of the fading.
+        """
+        if method in ['in', 'out']:
+            alpha_range = xrange(0, 255, step) if method == 'in' else reversed(xrange(0, 255, step))
+            for r in alpha_range:
+                self._get_player_interface().SetAlpha(ObjectPath("/dev/null", variant_level=0), long(r))
+
+    @check_player_is_active
+    def fade_in(self, step=2):
+        """
+        Fades the video in (from 0 to 255)
+        """
+        self._fade(method='in', step=step)
+
+    @check_player_is_active
+    def fade_out(self, step=2):
+        """
+        Fades the video out (from 255 to 0)
+        """
+        self._fade(method='out', step=step)
+
+    @check_player_is_active
+    def set_alpha(self, alpha):
+        self._get_player_interface().SetAlpha(ObjectPath("/dev/null", variant_level=0), long(alpha))
 
     @check_player_is_active
     def next(self):
