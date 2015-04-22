@@ -3,28 +3,45 @@ import time
 import os
 import signal
 import logging
-from functools import wraps, reduce
-from glob import glob
+import threading
 
+from functools import wraps
+from glob import glob
 from dbus import DBusException, Int64, ObjectPath
+
+import omxplayer.bus_finder
+from omxplayer.dbus_connection import DBusConnection, \
+                                      DBusConnectionError
 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-import omxplayer.bus_finder
-from omxplayer.dbus_connection import DBusConnection, DBusConnectionError
-
 
 RETRY_DELAY = 0.05
 
-import threading
+
+class FileCleaner(object):
+    def __init__(self, path):
+        self.path = path
+
+    def clean(self):
+        for file in glob.glob(self.path):
+            os.remove(file)
 
 
 class OMXPlayer(object):
+    """
+    OMXPlayer controller
+
+    This works by speaking to OMXPlayer over DBus sending messages.
+    Args:
+        filename (str): Path to the file you wish to play
+    """
     def __init__(self, filename,
                  args=[], bus_address_finder=None, Connection=None):
         logger.debug('Instantiating OMXPlayer')
+        self.clean_old_files()
 
         self.args = args
 
@@ -36,9 +53,15 @@ class OMXPlayer(object):
         self.tries = 0
         self._is_playing = True
         self._process = self.setup_omxplayer_process(filename)
-        self.connection = self.setup_dbus_connection(Connection, bus_address_finder)
+        self.connection = self.setup_dbus_connection(Connection,
+                                                     bus_address_finder)
         time.sleep(0.5)  # Wait for the DBus interface to be initialised
         self.pause()
+
+    def clean_old_files(self):
+        logger.debug("Removing old OMXPlayer pid files etc")
+        cleaner = FileCleaner('/tmp/*omxplayer*')
+        cleaner.clean()
 
     def run_omxplayer(self, devnull, filename):
         def on_exit():
@@ -87,7 +110,6 @@ class OMXPlayer(object):
                 time.sleep(RETRY_DELAY)
         raise SystemError('DBus cannot connect to the OMXPlayer process')
 
-
     """ Utilities """
 
     def check_player_is_active(fn):
@@ -108,26 +130,41 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def can_quit(self):
+        """
+        Checks whether it is permissible to quit the OMXPlayer instance
+        """
         return bool(self._get_root_interface().CanQuit())
 
     @check_player_is_active
-    def can_raise(self):
-        return bool(self._get_root_interface().CanRaise())
-
-    @check_player_is_active
     def fullscreen(self):
+        """
+        Checks whether the player can go fullscreen
+        """
         return bool(self._get_root_interface().FullScreen())
 
     @check_player_is_active
     def can_set_fullscreen(self):
+        """
+        Checks whether the player can go fullscreen
+        """
         return bool(self._get_root_interface().CanSetFullscreen())
 
     @check_player_is_active
     def has_track_list(self):
+        """
+        Checks whether the player has a tracklist
+        (e.g. playlist or recently played items)
+        Currently OMXPlayer doesn't have this functionality
+        """
         return bool(self._get_root_interface().HasTrackList())
 
     @check_player_is_active
     def identity(self):
+        """
+        Checks whether the player has a tracklist
+        (e.g. playlist or recently played items)
+        Currently OMXPlayer doesn't have this functionality
+        """
         return str(self._get_root_interface().Identity())
 
     @check_player_is_active
@@ -162,6 +199,11 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def playback_status(self):
+        """
+        Returns:
+            Current playback status (str):
+            one of "Playing" | "Paused" | "Stopped"
+        """
         return str(self._get_properties_interface().PlaybackStatus())
 
     @check_player_is_active
@@ -212,14 +254,12 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def pause(self):
-        """
-        Toggles playing state.
-        """
-        self._is_playing = not self._is_playing
         self._get_player_interface().Pause()
 
+    @check_player_is_active
     def play_pause(self):
-        self.pause()
+        self._get_player_interface().PlayPause()
+        self._is_playing = not self._is_playing
 
     @check_player_is_active
     def stop(self):
@@ -231,7 +271,9 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def set_position(self, position_us):
-        self._get_player_interface().SetPosition(ObjectPath('/not/used', variant_level=0), Int64(position_us))
+        self._get_player_interface().SetPosition(
+            ObjectPath('/not/used', variant_level=0), Int64(position_us)
+        )
 
     @check_player_is_active
     def list_video(self):
@@ -251,7 +293,7 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def is_playing(self):
-        self._is_playing = self.playback_status() == "Playing"
+        self._is_playing = (self.playback_status() == "Playing")
         logger.info("Playing?: %s" % self._is_playing)
         return self._is_playing
 
@@ -263,11 +305,11 @@ class OMXPlayer(object):
             time.sleep(0.05)
             logger.debug("Wait for playing to start")
             while self.is_playing():
-                logger.debug("STATE: Playing")
                 time.sleep(0.05)
-            logger.debug("STATE: Not playing")
         except DBusException:
-            logger.info("DBus timed out :(")
+            logger.info(
+                "Cannot play synchronously any longer as DBus calls time out."
+            )
 
     @check_player_is_active
     def play(self):
@@ -290,4 +332,13 @@ class OMXPlayer(object):
         except OSError:
             logger.debug('Could not find the process to kill')
         logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
+        self._process.wait()
 
+
+#  MediaPlayer2.Player types:
+#    Track_Id: DBus ID of track
+#    Plaback_Rate: Multiplier for playback speed (1 = normal speed)
+#    Volume: 0--1, 0 is muted and 1 is full volume
+#    Time_In_Us: Time in microseconds
+#    Playback_Status: Playing|Paused|Stopped
+#    Loop_Status: None|Track|Playlist

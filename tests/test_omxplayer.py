@@ -34,7 +34,6 @@ class OMXPlayerTests(unittest.TestCase):
         ['can_quit', 'CanQuit'],
         ['fullscreen', 'FullScreen'],
         ['can_set_fullscreen', 'CanSetFullscreen'],
-        ['can_raise', 'CanRaise'],
         ['has_track_list', 'HasTrackList'],
         ['identity', 'Identity']
     ])
@@ -111,8 +110,7 @@ class OMXPlayerTests(unittest.TestCase):
         with patch.object(self.player, interface_name) as interface:
             self.run_command(command_name, *command_args)
             # generates a call of the form `call().CanQuit`
-            expected_call = getattr(call(), interface_command_name)(
-                *command_args)
+            expected_call = getattr(call(), interface_command_name)(*command_args)
             interface.assert_has_calls(expected_call)
 
     def run_command(self, command_name, *args):
