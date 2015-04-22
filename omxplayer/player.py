@@ -3,9 +3,10 @@ import time
 import os
 import signal
 import logging
-from functools import wraps
+from functools import wraps, reduce
+from glob import glob
 
-from dbus import DBusException
+from dbus import DBusException, Int64, ObjectPath
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,14 +17,16 @@ from omxplayer.dbus_connection import DBusConnection, DBusConnectionError
 
 
 RETRY_DELAY = 0.05
-OMXPLAYER_ARGS = ['--no-osd']
 
 import threading
 
 
 class OMXPlayer(object):
-    def __init__(self, filename, bus_address_finder=None, Connection=None):
+    def __init__(self, filename,
+                 args=[], bus_address_finder=None, Connection=None):
         logger.debug('Instantiating OMXPlayer')
+
+        self.args = args
 
         if not bus_address_finder:
             bus_address_finder = omxplayer.bus_finder.BusFinder()
@@ -46,8 +49,10 @@ class OMXPlayer(object):
             process.wait()
             on_exit()
 
+        command = ['omxplayer'] + self.args + [filename]
+        logger.debug("Opening omxplayer with the command: %s" % command)
         process = subprocess.Popen(
-            ['omxplayer'] + OMXPLAYER_ARGS + [filename],
+            command,
             stdout=devnull,
             preexec_fn=os.setsid)
 
@@ -63,8 +68,13 @@ class OMXPlayer(object):
             return process
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
+        logger.debug('Cleaning up existing dbus files')
+        for dbus_file in glob('/tmp/omxplayerdbus.*'):
+            os.remove(dbus_file)
+
         logger.debug('Trying to connect to OMXPlayer via DBus')
         while self.tries < 50:
+            logger.debug('DBus connect attempt: {}'.format(self.tries))
             try:
                 connection = Connection(bus_address_finder.get_address())
                 logger.debug(
@@ -72,7 +82,7 @@ class OMXPlayer(object):
                 return connection
 
             except (DBusConnectionError, IOError):
-                logger.debug('DBus connect attempt: {}'.format(self.tries))
+                logger.debug('Failed to connect to OMXPlayer DBus address')
                 self.tries += 1
                 time.sleep(RETRY_DELAY)
         raise SystemError('DBus cannot connect to the OMXPlayer process')
@@ -217,11 +227,19 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def seek(self, relative_position_us):
-        self._get_player_interface().Seek(relative_position_us)
+        self._get_player_interface().Seek(Int64(relative_position_us))
 
     @check_player_is_active
     def set_position(self, position_us):
-        self._get_player_interface().SetPosition(position_us)
+        self._get_player_interface().SetPosition(ObjectPath('/not/used', variant_level=0), Int64(position_us))
+
+    @check_player_is_active
+    def list_video(self):
+        return map(str, self._get_player_interface().ListVideo())
+
+    @check_player_is_active
+    def list_audio(self):
+        return map(str, self._get_player_interface().ListAudio())
 
     @check_player_is_active
     def list_subtitles(self):
@@ -267,6 +285,9 @@ class OMXPlayer(object):
 
     def quit(self):
         logger.debug('Quitting OMXPlayer')
-        os.killpg(self._process.pid, signal.SIGTERM)
+        try:
+            os.killpg(self._process.pid, signal.SIGTERM)
+        except OSError:
+            logger.debug('Could not find the process to kill')
         logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
-        self._process.wait()
+
