@@ -1,13 +1,21 @@
-
 # Python OMXPlayer wrapper
 
 > Control OMXPlayer from Python on the Raspberry Pi.
 
-A completely rewritten version of PyOMXPlayer utilising `OMXPlayer`'s `DBus` interface.
+## Install
+For someone who just wants to use the package:
+```shell
+$ python setup.py install
+```
+
+If you're feeling helpful, and decide to help develop the package:
+```shell
+$ python setup.py develop
+```
+This will install via symlinks so that you can continue to work on it locally
+but import it from other python packages
 
 ## Hello world
-WARNING: Don't have an RPi to test this at the moment, please report an issue if this doesn't work!
-
 ```python
 from omxplayer import OMXPlayer
 from time import sleep
