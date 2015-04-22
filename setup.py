@@ -27,6 +27,6 @@ setup(
     packages=find_packages(exclude=['*tests']),
     install_requires=[],
     extras_require={
-        'test': ['nosetests']
+        'test': ['nose']
     }
 )
