@@ -38,3 +38,7 @@ player.pause()
 # Kill the `omxplayer` process gracefully.
 player.quit()
 ```
+
+## Docs
+You can read the docs here:
+[python-omxplayer-wrapper.rtfd.org](http://python-omxplayer-wrapper.rtfd.org)
