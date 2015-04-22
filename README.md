@@ -1,5 +1,9 @@
 # Python OMXPlayer wrapper
 
+[![Documentation
+Status](https://readthedocs.org/projects/python-omxplayer-wrapper/badge/?version=latest)](https://readthedocs.org/projects/python-omxplayer-wrapper/?badge=latest)
+
+
 > Control OMXPlayer from Python on the Raspberry Pi.
 
 ## Install
