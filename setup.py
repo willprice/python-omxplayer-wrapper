@@ -25,7 +25,9 @@ setup(
     keywords='omxplayer pi raspberry raspberrypi raspberry_pi library',
 
     packages=find_packages(exclude=['*tests']),
-    install_requires=['dbus-python'],
+    # Depends on dbus-python which is only shipped via package managers or as a
+    # source dist (incompatible with distutils
+    install_requires=[],
     extras_require={
         'test': ['nose']
     }
