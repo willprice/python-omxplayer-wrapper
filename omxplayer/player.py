@@ -26,7 +26,7 @@ class FileCleaner(object):
         self.path = path
 
     def clean(self):
-        for file in glob.glob(self.path):
+        for file in glob(self.path):
             os.remove(file)
 
 
