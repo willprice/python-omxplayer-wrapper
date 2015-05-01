@@ -26,7 +26,7 @@ class FileCleaner(object):
         self.path = path
 
     def clean(self):
-        for file in glob.glob(self.path):
+        for file in glob(self.path):
             os.remove(file)
 
 
@@ -224,11 +224,11 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def position(self):
-        return int(self._get_properties_interface().Position())
+        return long(self._get_properties_interface().Position())
 
     @check_player_is_active
     def duration_us(self):
-        return int(self._get_properties_interface().Duration())
+        return long(self._get_properties_interface().Duration())
 
     @check_player_is_active
     def duration(self):
@@ -270,10 +270,8 @@ class OMXPlayer(object):
         self._get_player_interface().Seek(Int64(relative_position_us))
 
     @check_player_is_active
-    def set_position(self, position_us):
-        self._get_player_interface().SetPosition(
-            ObjectPath('/not/used', variant_level=0), Int64(position_us)
-        )
+    def set_position(self, position):
+        self._get_player_interface().SetPosition(ObjectPath("/not/used"), Int64(position*1000*1000))
 
     @check_player_is_active
     def list_video(self):
