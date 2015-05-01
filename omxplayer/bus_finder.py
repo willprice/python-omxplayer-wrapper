@@ -7,7 +7,7 @@ logger = getLogger(__name__)
 
 
 class BusFinder(object):
-    def __init__(self, path='/tmp/omxplayerdbus.pi'):
+    def __init__(self, path=None):
         self.path = path
         logger.debug('BusFinder initialised with path: %s' % path)
 
