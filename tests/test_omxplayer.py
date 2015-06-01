@@ -12,12 +12,13 @@ from omxplayer.player import OMXPlayer
 MOCK_OPEN = mock_open()
 
 
+@patch('__builtin__.open', MOCK_OPEN)
 @patch('os.path.isfile')
 @patch('time.sleep')
 @patch('subprocess.Popen')
 class OMXPlayerTests(unittest.TestCase):
     TEST_FILE_NAME = "./test.mp4"
-    @patch('__builtin__.open', MOCK_OPEN)
+
     def test_opens_file_in_omxplayer(self, popen, *args):
         self.patch_and_run_omxplayer()
         popen.assert_called_once_with(

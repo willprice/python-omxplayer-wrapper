@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 #### CLASSES ####
+class FileNotFoundError(Exception):
+    pass
+
 class FileCleaner(object):
     def __init__(self, path):
         self.path = path
@@ -39,8 +42,12 @@ class OMXPlayer(object):
         filename (str): Path to the file you wish to play
     """
     def __init__(self, filename,
-                 args=[], bus_address_finder=None, Connection=None):
+                 args=[], 
+                 bus_address_finder=None, 
+                 Connection=None,
+                 cleaner=FileCleaner('/tmp/*omxplayer*')):
         logger.debug('Instantiating OMXPlayer')
+        self.cleaner = cleaner
         self.clean_old_files()
 
         self.args = args
@@ -60,10 +67,9 @@ class OMXPlayer(object):
 
     def clean_old_files(self):
         logger.debug("Removing old OMXPlayer pid files etc")
-        cleaner = FileCleaner('/tmp/*omxplayer*')
-        cleaner.clean()
+        self.cleaner.clean()
 
-    def run_omxplayer(self, devnull, filename):
+    def run_omxplayer(self, filename):
         def on_exit():
             logger.info("OMXPlayer process is dead, all DBus calls from here "
                         "will fail")
@@ -74,27 +80,24 @@ class OMXPlayer(object):
 
         command = ['omxplayer'] + self.args + [filename]
         logger.debug("Opening omxplayer with the command: %s" % command)
-        process = subprocess.Popen(
-            command,
-            stdout=devnull,
-            preexec_fn=os.setsid)
-
+        with open(os.devnull, 'w') as devnull:
+            process = subprocess.Popen(command,
+                                       stdout=devnull,
+                                       preexec_fn=os.setsid)
         m = threading.Thread(target=monitor, args=(process, on_exit))
         m.start()
         return process
 
     def setup_omxplayer_process(self, filename):
-        with open(os.devnull, 'w') as devnull:
             logger.debug('Setting up OMXPlayer process')
-            process = self.run_omxplayer(devnull, filename)
-            logger.debug('Process opened with PID %s' % process.pid)
+            if not os.path.isfile(filename):
+                raise FileNotFoundError("Could not find: {}".format(filename))
+            else:
+                process = self.run_omxplayer(filename)
+                logger.debug('Process opened with PID %s' % process.pid)
             return process
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
-        logger.debug('Cleaning up existing dbus files')
-        for dbus_file in glob('/tmp/omxplayerdbus.*'):
-            os.remove(dbus_file)
-
         logger.debug('Trying to connect to OMXPlayer via DBus')
         while self.tries < 50:
             logger.debug('DBus connect attempt: {}'.format(self.tries))
@@ -271,7 +274,7 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def set_position(self, position):
-        self._get_player_interface().SetPosition(ObjectPath("/not/used"), Int64(position*1000*1000))
+        self._get_player_interface().SetPosition(None, Int64(position*1000*1000))
 
     @check_player_is_active
     def list_video(self):
