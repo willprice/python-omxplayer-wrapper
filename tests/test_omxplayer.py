@@ -13,6 +13,7 @@ MOCK_OPEN = mock_open()
 
 
 @patch('__builtin__.open', MOCK_OPEN)
+@patch('os.killpg')
 @patch('os.path.isfile')
 @patch('time.sleep')
 @patch('subprocess.Popen')
@@ -41,7 +42,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['has_track_list', 'HasTrackList'],
         ['identity', 'Identity']
     ])
-    def test_root_interface_commands(self, popen, sleep, isfile, command_name,
+    def test_root_interface_commands(self, popen, sleep, isfile, killpg, command_name,
                                      interface_command_name, *args):
         self.patch_and_run_omxplayer()
         self.patch_interface_and_run_command('_get_root_interface',
@@ -58,7 +59,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['list_subtitles', 'ListSubtitles'],
         ['action', 'Action', 'p']
     ])
-    def test_player_interface_commands(self, popen, sleep, isfile, command_name,
+    def test_player_interface_commands(self, popen, sleep, isfile, killpg, command_name,
                                        interface_command_name, *args):
         self.patch_and_run_omxplayer()
         self.patch_interface_and_run_command('_get_player_interface',
@@ -80,26 +81,24 @@ class OMXPlayerTests(unittest.TestCase):
         ['minimum_rate', 'MinimumRate'],
         ['maximum_rate', 'MaximumRate'],
     ])
-    def test_properties_interface_commands(self, popen, sleep, isfile, command_name,
+    def test_properties_interface_commands(self, popen, sleep, isfile, killpg, command_name,
                                            interface_command_name, *args):
         self.patch_and_run_omxplayer()
         self.patch_interface_and_run_command('_get_properties_interface',
                                              command_name,
                                              interface_command_name, *args)
 
-    def test_quitting(self, popen, *args):
+    def test_quitting(self, popen, sleep, isfile, killpg, *args):
         omxplayer_process = Mock()
         popen.return_value = omxplayer_process
-        with patch('omxplayer.player.os.killpg') as killpg:
-            self.patch_and_run_omxplayer()
-            killpg.assert_called_once_with(omxplayer_process.pid, 15)
+        self.patch_and_run_omxplayer()
+        killpg.assert_called_once_with(omxplayer_process.pid, 15)
 
-    def test_quitting_waits_for_omxplayer_to_die(self, popen, *args):
+    def test_quitting_waits_for_omxplayer_to_die(self, popen, sleep, isfile, killpg, *args):
         omxplayer_process = Mock()
         popen.return_value = omxplayer_process
-        with patch('omxplayer.player.os.killpg') as killpg:
-            self.patch_and_run_omxplayer()
-            omxplayer_process.wait.assert_has_calls([call() for _ in range(2)])
+        self.patch_and_run_omxplayer()
+        omxplayer_process.wait.assert_has_calls([call() for _ in range(2)])
 
     def test_check_process_still_exists_before_dbus_call(self, *args):
         self.patch_and_run_omxplayer()
@@ -132,7 +131,7 @@ class OMXPlayerTests(unittest.TestCase):
     # Must have the prefix 'patch' for the decorators to take effect
     def patch_and_run_omxplayer(self, Connection=Mock()):
         bus_address_finder = Mock()
-        bus_address_finder.get_address = Mock(return_val="example_bus_address")
+        bus_address_finder.get_address.return_val = "example_bus_address"
         self.player = OMXPlayer(self.TEST_FILE_NAME,
                                 bus_address_finder=bus_address_finder,
                                 Connection=Connection,
