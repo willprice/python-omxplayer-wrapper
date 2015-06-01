@@ -9,19 +9,19 @@ from omxplayer.dbus_connection import DBusConnectionError
 from omxplayer.player import OMXPlayer
 
 
-m = mock_open()
+MOCK_OPEN = mock_open()
 
 
 @patch('time.sleep')
 @patch('subprocess.Popen')
 class OMXPlayerTests(unittest.TestCase):
     TEST_FILE_NAME = "./test.mp4"
-    @patch('__builtin__.open', m)
+    @patch('__builtin__.open', MOCK_OPEN)
     def test_opens_file_in_omxplayer(self, popen, *args):
         self.patch_and_run_omxplayer()
         popen.assert_called_once_with(
             ['omxplayer', './test.mp4'],
-            preexec_fn=os.setsid, stdout=m())
+            preexec_fn=os.setsid, stdout=MOCK_OPEN())
 
     @patch('time.sleep')
     def test_tries_to_open_dbus_again_if_it_cant_connect(self, *args):
