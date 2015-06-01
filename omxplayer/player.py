@@ -327,9 +327,9 @@ class OMXPlayer(object):
 
     def quit(self):
         logger.debug('Quitting OMXPlayer')
-        self._process.wait()
         try:
             os.killpg(self._process.pid, signal.SIGTERM)
+            self._process.wait()
             logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
         except OSError:
             logger.debug('Could not find the process to kill')
