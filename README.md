@@ -3,6 +3,9 @@
 [![Documentation
 Status](https://readthedocs.org/projects/python-omxplayer-wrapper/badge/?version=latest)](https://readthedocs.org/projects/python-omxplayer-wrapper/?badge=latest)
 
+[![Build
+Status](https://travis-ci.org/willprice/python-omxplayer-wrapper.svg)](https://travis-ci.org/willprice/python-omxplayer-wrapper)
+
 
 > Control OMXPlayer from Python on the Raspberry Pi.
 
