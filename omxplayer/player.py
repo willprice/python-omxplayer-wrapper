@@ -69,7 +69,7 @@ class OMXPlayer(object):
         logger.debug("Removing old OMXPlayer pid files etc")
         self.cleaner.clean()
 
-    def run_omxplayer(self, filename):
+    def run_omxplayer(self, filename, devnull):
         def on_exit():
             logger.info("OMXPlayer process is dead, all DBus calls from here "
                         "will fail")
@@ -80,10 +80,9 @@ class OMXPlayer(object):
 
         command = ['omxplayer'] + self.args + [filename]
         logger.debug("Opening omxplayer with the command: %s" % command)
-        with open(os.devnull, 'w') as devnull:
-            process = subprocess.Popen(command,
-                                       stdout=devnull,
-                                       preexec_fn=os.setsid)
+        process = subprocess.Popen(command,
+                                   stdout=devnull,
+                                   preexec_fn=os.setsid)
         m = threading.Thread(target=monitor, args=(process, on_exit))
         m.start()
         return process
@@ -92,10 +91,10 @@ class OMXPlayer(object):
             logger.debug('Setting up OMXPlayer process')
             if not os.path.isfile(filename):
                 raise FileNotFoundError("Could not find: {}".format(filename))
-            else:
-                process = self.run_omxplayer(filename)
+            with open(os.devnull, 'w') as devnull:
+                process = self.run_omxplayer(filename, devnull)
                 logger.debug('Process opened with PID %s' % process.pid)
-            return process
+                return process
 
     def setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Trying to connect to OMXPlayer via DBus')
@@ -328,12 +327,12 @@ class OMXPlayer(object):
 
     def quit(self):
         logger.debug('Quitting OMXPlayer')
+        self._process.wait()
         try:
             os.killpg(self._process.pid, signal.SIGTERM)
+            logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
         except OSError:
             logger.debug('Could not find the process to kill')
-        logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
-        self._process.wait()
 
 
 #  MediaPlayer2.Player types:
