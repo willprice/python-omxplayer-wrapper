@@ -13,14 +13,15 @@ import omxplayer.bus_finder
 from omxplayer.dbus_connection import DBusConnection, \
                                       DBusConnectionError
 
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-
+#### CONSTANTS ####
 RETRY_DELAY = 0.05
 
 
+#### FILE GLOBAL OBJECTS ####
+logger = logging.getLogger(__name__)
+
+
+#### CLASSES ####
 class FileCleaner(object):
     def __init__(self, path):
         self.path = path
@@ -28,7 +29,6 @@ class FileCleaner(object):
     def clean(self):
         for file in glob(self.path):
             os.remove(file)
-
 
 class OMXPlayer(object):
     """

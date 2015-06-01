@@ -4,10 +4,11 @@ from mock import patch, mock_open
 
 from omxplayer.bus_finder import BusFinder
 
-
+#### CONSTANTS ####
 EXAMPLE_DBUS_FILE_CONTENTS = 'EXAMPLE_CONTENTS'
 
 
+#### CLASSES ####
 class BusFinderTests(unittest.TestCase):
     def test_stores_contents_of_omxplayer_dbus_file(self):
         with patch('__builtin__.open',

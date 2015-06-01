@@ -1,12 +1,12 @@
 import unittest
 import os
+import dbus
 
 from nose_parameterized import parameterized
 from mock import patch, Mock, call, mock_open
 
 from omxplayer.dbus_connection import DBusConnectionError
 from omxplayer.player import OMXPlayer
-from omxplayer.player import OMXPLAYER_ARGS
 
 
 m = mock_open()
@@ -15,11 +15,12 @@ m = mock_open()
 @patch('time.sleep')
 @patch('subprocess.Popen')
 class OMXPlayerTests(unittest.TestCase):
+    TEST_FILE_NAME = "./test.mp4"
     @patch('__builtin__.open', m)
     def test_opens_file_in_omxplayer(self, popen, *args):
         self.patch_and_run_omxplayer()
         popen.assert_called_once_with(
-            ['omxplayer'] + OMXPLAYER_ARGS + ['test.mp4'],
+            ['omxplayer', './test.mp4'],
             preexec_fn=os.setsid, stdout=m())
 
     @patch('time.sleep')
@@ -50,7 +51,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['pause', 'Pause'],
         ['stop', 'Stop'],
         ['seek', 'Seek', 100],
-        ['set_position', 'SetPosition', 100000],
+        ['set_position', 'SetPosition', dbus.Int64(100000L)],
         ['list_subtitles', 'ListSubtitles'],
         ['action', 'Action', 'p']
     ])
@@ -102,6 +103,10 @@ class OMXPlayerTests(unittest.TestCase):
 
         process.poll.assert_called_once_with()
 
+    def test_checks_media_file_exists_before_launching_player(self, *args):
+        with patch('os.path') as ospath:
+            self.patch_and_run_omxplayer()
+            ospath.isfile.assert_called_once_with(self.TEST_FILE_NAME)
 
     def patch_interface_and_run_command(self, interface_name,
                                         command_name, interface_command_name,
@@ -121,4 +126,7 @@ class OMXPlayerTests(unittest.TestCase):
     def patch_and_run_omxplayer(self, Connection=Mock()):
         bus_address_finder = Mock()
         bus_address_finder.get_address = Mock(return_val="example_bus_address")
-        self.player = OMXPlayer('test.mp4', bus_address_finder, Connection)
+        self.player = OMXPlayer(self.TEST_FILE_NAME,
+                                bus_address_finder=bus_address_finder,
+                                Connection=Connection)
+        self.player.quit()
