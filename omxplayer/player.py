@@ -42,8 +42,8 @@ class OMXPlayer(object):
         filename (str): Path to the file you wish to play
     """
     def __init__(self, filename,
-                 args=[], 
-                 bus_address_finder=None, 
+                 args=[],
+                 bus_address_finder=None,
                  Connection=None,
                  cleaner=FileCleaner('/tmp/*omxplayer*')):
         logger.debug('Instantiating OMXPlayer')
@@ -273,7 +273,7 @@ class OMXPlayer(object):
 
     @check_player_is_active
     def set_position(self, position):
-        self._get_player_interface().SetPosition(None, Int64(position*1000*1000))
+        self._get_player_interface().SetPosition(ObjectPath("/not/used"), Int64(position*1000*1000))
 
     @check_player_is_active
     def list_video(self):
