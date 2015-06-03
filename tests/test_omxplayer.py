@@ -1,5 +1,6 @@
 import unittest
 import os
+import signal
 import dbus
 
 from nose_parameterized import parameterized
@@ -92,12 +93,16 @@ class OMXPlayerTests(unittest.TestCase):
         omxplayer_process = Mock()
         popen.return_value = omxplayer_process
         self.patch_and_run_omxplayer()
-        killpg.assert_called_once_with(omxplayer_process.pid, 15)
+        self.player.quit()
+        killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
 
     def test_quitting_waits_for_omxplayer_to_die(self, popen, sleep, isfile, killpg, *args):
         omxplayer_process = Mock()
         popen.return_value = omxplayer_process
         self.patch_and_run_omxplayer()
+        self.player.quit()
+        # There should be one call for the monitor process and an additional
+        # call for when we wait for the process to die
         omxplayer_process.wait.assert_has_calls([call() for _ in range(2)])
 
     def test_check_process_still_exists_before_dbus_call(self, *args):
@@ -113,6 +118,12 @@ class OMXPlayerTests(unittest.TestCase):
         with patch('os.path') as ospath:
             self.patch_and_run_omxplayer()
             ospath.isfile.assert_called_once_with(self.TEST_FILE_NAME)
+
+    def test_set_position_checks_to_see_if_position_is_less_than_length(self, *args):
+        #self.patch_and_run_omxplayer()
+        pass
+
+
 
     def patch_interface_and_run_command(self, interface_name,
                                         command_name, interface_command_name,
@@ -136,4 +147,3 @@ class OMXPlayerTests(unittest.TestCase):
                                 bus_address_finder=bus_address_finder,
                                 Connection=Connection,
                                 cleaner=Mock())
-        self.player.quit()

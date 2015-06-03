@@ -83,8 +83,9 @@ class OMXPlayer(object):
         process = subprocess.Popen(command,
                                    stdout=devnull,
                                    preexec_fn=os.setsid)
-        m = threading.Thread(target=monitor, args=(process, on_exit))
-        m.start()
+        self._process_monitor = threading.Thread(target=monitor, args=(process,
+                                                               on_exit))
+        self._process_monitor.start()
         return process
 
     def setup_omxplayer_process(self, filename):
@@ -330,6 +331,7 @@ class OMXPlayer(object):
         try:
             os.killpg(self._process.pid, signal.SIGTERM)
             self._process.wait()
+            self._process_monitor.join()
             logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
         except OSError:
             logger.debug('Could not find the process to kill')
