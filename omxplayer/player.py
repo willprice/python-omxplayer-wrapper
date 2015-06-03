@@ -4,8 +4,9 @@ import os
 import signal
 import logging
 import threading
+import math
 
-from functools import wraps
+from decorator import decorator
 from glob import glob
 from dbus import DBusException, Int64, ObjectPath
 
@@ -38,6 +39,7 @@ class OMXPlayer(object):
     OMXPlayer controller
 
     This works by speaking to OMXPlayer over DBus sending messages.
+
     Args:
         filename (str): Path to the file you wish to play
     """
@@ -48,7 +50,7 @@ class OMXPlayer(object):
                  cleaner=FileCleaner('/tmp/*omxplayer*')):
         logger.debug('Instantiating OMXPlayer')
         self.cleaner = cleaner
-        self.clean_old_files()
+        self._clean_old_files()
 
         self.args = args
 
@@ -59,17 +61,17 @@ class OMXPlayer(object):
 
         self.tries = 0
         self._is_playing = True
-        self._process = self.setup_omxplayer_process(filename)
-        self.connection = self.setup_dbus_connection(Connection,
+        self._process = self._setup_omxplayer_process(filename)
+        self.connection = self._setup_dbus_connection(Connection,
                                                      bus_address_finder)
         time.sleep(0.5)  # Wait for the DBus interface to be initialised
         self.pause()
 
-    def clean_old_files(self):
+    def _clean_old_files(self):
         logger.debug("Removing old OMXPlayer pid files etc")
         self.cleaner.clean()
 
-    def run_omxplayer(self, filename, devnull):
+    def _run_omxplayer(self, filename, devnull):
         def on_exit():
             logger.info("OMXPlayer process is dead, all DBus calls from here "
                         "will fail")
@@ -88,16 +90,16 @@ class OMXPlayer(object):
         self._process_monitor.start()
         return process
 
-    def setup_omxplayer_process(self, filename):
+    def _setup_omxplayer_process(self, filename):
             logger.debug('Setting up OMXPlayer process')
             if not os.path.isfile(filename):
                 raise FileNotFoundError("Could not find: {}".format(filename))
             with open(os.devnull, 'w') as devnull:
-                process = self.run_omxplayer(filename, devnull)
+                process = self._run_omxplayer(filename, devnull)
                 logger.debug('Process opened with PID %s' % process.pid)
                 return process
 
-    def setup_dbus_connection(self, Connection, bus_address_finder):
+    def _setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Trying to connect to OMXPlayer via DBus')
         while self.tries < 50:
             logger.debug('DBus connect attempt: {}'.format(self.tries))
@@ -115,11 +117,12 @@ class OMXPlayer(object):
 
     """ Utilities """
 
-    def check_player_is_active(fn):
+    def _check_player_is_active(fn):
         # wraps is a decorator that improves debugging wrapped methods
-        @wraps(fn)
-        def wrapped(self, *args, **kwargs):
+        def wrapped(fun, self, *args, **kwargs):
             logger.debug('Checking if process is still alive')
+            # poll determines whether the process has terminated,
+            # if it hasn't it returns None.
             if self._process.poll() is None:
                 logger.debug('OMXPlayer is running, so execute %s' %
                              fn.__name__)
@@ -127,179 +130,265 @@ class OMXPlayer(object):
             else:
                 logger.info('Process is no longer alive, can\'t run command')
 
-        return wrapped
+        return decorator(wrapped, fn)
 
     """ ROOT INTERFACE METHODS """
 
-    @check_player_is_active
+    @_check_player_is_active
     def can_quit(self):
         """
-        Checks whether it is permissible to quit the OMXPlayer instance
-        """
+        Returns:
+            bool: """
         return bool(self._get_root_interface().CanQuit())
 
-    @check_player_is_active
-    def fullscreen(self):
-        """
-        Checks whether the player can go fullscreen
-        """
-        return bool(self._get_root_interface().FullScreen())
-
-    @check_player_is_active
+    @_check_player_is_active
     def can_set_fullscreen(self):
         """
-        Checks whether the player can go fullscreen
-        """
+        Returns:
+            bool: """
         return bool(self._get_root_interface().CanSetFullscreen())
 
-    @check_player_is_active
-    def has_track_list(self):
-        """
-        Checks whether the player has a tracklist
-        (e.g. playlist or recently played items)
-        Currently OMXPlayer doesn't have this functionality
-        """
-        return bool(self._get_root_interface().HasTrackList())
-
-    @check_player_is_active
+    @_check_player_is_active
     def identity(self):
         """
-        Checks whether the player has a tracklist
-        (e.g. playlist or recently played items)
-        Currently OMXPlayer doesn't have this functionality
+        Get the ID of the media player
+
+        Returns:
+            bool:
         """
         return str(self._get_root_interface().Identity())
 
-    @check_player_is_active
-    def supported_uri_schemes(self):
-        return map(str, self._get_root_interface().SupportedUriSchemes())
-
     """ PLAYER INTERFACE PROPERTIES """
 
-    @check_player_is_active
+    @_check_player_is_active
     def can_go_next(self):
+        """
+        Returns:
+            bool: Whether the player can move to the next item in the playlist
+        """
         return bool(self._get_properties_interface().CanGoNext())
 
-    @check_player_is_active
+    @_check_player_is_active
     def can_go_previous(self):
+        """
+        Returns:
+            bool: Whether the player can move to the previous item in the
+            playlist
+        """
         return bool(self._get_properties_interface().CanGoPrevious())
 
-    @check_player_is_active
+    @_check_player_is_active
     def can_seek(self):
+        """
+        Returns:
+            bool: Whether the player can seek """
         return bool(self._get_properties_interface().CanSeek())
 
-    @check_player_is_active
+    @_check_player_is_active
     def can_control(self):
+        """
+        Returns:
+            bool: """
         return bool(self._get_properties_interface().CanControl())
 
-    @check_player_is_active
+    @_check_player_is_active
     def can_play(self):
+        """
+        Returns:
+            bool: """
         return bool(self._get_properties_interface().CanPlay())
 
-    @check_player_is_active
+    @_check_player_is_active
     def can_pause(self):
+        """
+        Returns:
+            bool: """
         return bool(self._get_properties_interface().CanPause())
 
-    @check_player_is_active
+    @_check_player_is_active
     def playback_status(self):
         """
         Returns:
-            Current playback status (str):
-            one of "Playing" | "Paused" | "Stopped"
+            str: One of ("Playing" | "Paused" | "Stopped")
         """
         return str(self._get_properties_interface().PlaybackStatus())
 
-    @check_player_is_active
+    @_check_player_is_active
     def volume(self):
-        return float(self._get_properties_interface().Volume())
+        """
+        Returns:
+            volume (float): Volume in millibels
+        """
+        vol = float(self._get_properties_interface().Volume())
+        return 2000 * math.log(vol, 10)
 
-    @check_player_is_active
+    @_check_player_is_active
     def set_volume(self, volume):
-        return float(self._get_properties_interface().Volume(volume))
+        """
+        Args:
+            volume (float): Volume in millibels
+        """
+        return float(self._get_properties_interface().Volume(
+            10**(volume/2000.0)
+        ))
 
-    @check_player_is_active
+    @_check_player_is_active
     def mute(self):
+        """
+        Turns mute on, if the audio is already muted, then this does not do
+        anything
+
+        Returns:
+            None:
+        """
         self._get_properties_interface().Mute()
 
-    @check_player_is_active
+    @_check_player_is_active
     def unmute(self):
+        """
+        Unmutes the video, if the audio is already unmuted, then this does
+        not do anything
+
+        Returns:
+            None:
+        """
         self._get_properties_interface().Unmute()
 
-    @check_player_is_active
+    @_check_player_is_active
     def position(self):
-        return long(self._get_properties_interface().Position())
+        """
+        Returns:
+            float: The position in seconds
+        """
+        return self._get_properties_interface().Position() / (1000 * 1000.0)
 
-    @check_player_is_active
-    def duration_us(self):
+    @_check_player_is_active
+    def _duration_us(self):
+        """
+        Returns:
+            long: The duration in microseconds
+        """
         return long(self._get_properties_interface().Duration())
 
-    @check_player_is_active
+    @_check_player_is_active
     def duration(self):
-        return self.duration_us() / (1000 * 1000.0)
+        """
+        Returns:
+            float: The duration in seconds
+        """
+        return self._duration_us() / (1000 * 1000.0)
 
-    @check_player_is_active
+    @_check_player_is_active
     def minimum_rate(self):
+        """
+        Returns:
+            str: The minimum playback rate
+        """
         return float(self._get_properties_interface().MinimumRate())
 
-    @check_player_is_active
+    @_check_player_is_active
     def maximum_rate(self):
+        """
+        Returns:
+            str: The maximum playback rate
+        """
         return float(self._get_properties_interface().MaximumRate())
 
     """ PLAYER INTERFACE METHODS """
-
-    @check_player_is_active
-    def next(self):
-        self._get_player_interface().Next()
-
-    @check_player_is_active
-    def previous(self):
-        self._get_player_interface().Previous()
-
-    @check_player_is_active
+    @_check_player_is_active
     def pause(self):
+        """
+        Return:
+            None:
+        """
         self._get_player_interface().Pause()
 
-    @check_player_is_active
+    @_check_player_is_active
     def play_pause(self):
+        """
+        Return:
+            None:
+        """
         self._get_player_interface().PlayPause()
         self._is_playing = not self._is_playing
 
-    @check_player_is_active
+    @_check_player_is_active
     def stop(self):
         self._get_player_interface().Stop()
 
-    @check_player_is_active
-    def seek(self, relative_position_us):
-        self._get_player_interface().Seek(Int64(relative_position_us))
+    @_check_player_is_active
+    def seek(self, relative_position):
+        """
+        Args:
+            relative_position (float): The position in seconds to seek to.
+        """
+        self._get_player_interface().Seek(Int64(relative_position))
 
-    @check_player_is_active
+    @_check_player_is_active
     def set_position(self, position):
+        """
+        Args:
+            position (float): The position in seconds.
+        """
         self._get_player_interface().SetPosition(None, Int64(position*1000*1000))
 
-    @check_player_is_active
+    @_check_player_is_active
     def list_video(self):
+        """
+        Returns:
+            [str]: A list of all known video streams, each item is in the
+            format: ``<index>:<language>:<name>:<codec>:<active>``
+        """
         return map(str, self._get_player_interface().ListVideo())
 
-    @check_player_is_active
+    @_check_player_is_active
     def list_audio(self):
+        """
+        Returns:
+            [str]: A list of all known audio streams, each item is in the
+            format: ``<index>:<language>:<name>:<codec>:<active>``
+        """
         return map(str, self._get_player_interface().ListAudio())
 
-    @check_player_is_active
+    @_check_player_is_active
     def list_subtitles(self):
+        """
+        Returns:
+            [str]: A list of all known subtitles, each item is in the
+            format: ``<index>:<language>:<name>:<codec>:<active>``
+        """
         return map(str, self._get_player_interface().ListSubtitles())
 
-    @check_player_is_active
-    def action(self, key):
-        self._get_player_interface().Action(key)
+    @_check_player_is_active
+    def action(self, code):
+        """
+        Executes a keyboard command via a code
 
-    @check_player_is_active
+        Args:
+            code (int): The key code you wish to emulate
+                        refer to ``keys.py`` for the possible keys
+
+        Returns:
+            None:
+        """
+        self._get_player_interface().Action(code)
+
+    @_check_player_is_active
     def is_playing(self):
+        """
+        Returns:
+            None:
+        """
         self._is_playing = (self.playback_status() == "Playing")
         logger.info("Playing?: %s" % self._is_playing)
         return self._is_playing
 
-    @check_player_is_active
+    @_check_player_is_active
     def play_sync(self):
+        """
+        Returns:
+            None:
+        """
         self.play()
         logger.info("Playing synchronously")
         try:
@@ -308,12 +397,16 @@ class OMXPlayer(object):
             while self.is_playing():
                 time.sleep(0.05)
         except DBusException:
-            logger.info(
-                "Cannot play synchronously any longer as DBus calls time out."
+            logger.error(
+                "Cannot play synchronously any longer as DBus calls timed out."
             )
 
-    @check_player_is_active
+    @_check_player_is_active
     def play(self):
+        """
+        Returns:
+            None:
+        """
         if not self.is_playing():
             self.play_pause()
 
@@ -334,7 +427,7 @@ class OMXPlayer(object):
             self._process_monitor.join()
             logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
         except OSError:
-            logger.debug('Could not find the process to kill')
+            logger.error('Could not find the process to kill')
 
 
 #  MediaPlayer2.Player types:

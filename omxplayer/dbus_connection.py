@@ -9,11 +9,11 @@ class DBusConnectionError(Exception):
 class DBusConnection(object):
     """
     Attributes:
-    proxy                       The proxy object by which one interacts with a dbus object,
-                                this makes communicating with a similar to that of communicating
-                                with a  POJO.
-    root_interface              org.mpris.MediaPlayer2 interface proxy object
-    player_interface            org.mpris.MediaPlayer2.Player interface proxy object
+        proxy:  The proxy object by which one interacts  with a dbus object,
+                this makes communicating with a similar to that of communicating
+                with a  POJO.
+        root_interface:  org.mpris.MediaPlayer2 interface proxy object
+        player_interface: org.mpris.MediaPlayer2.Player interface  proxy object
     """
 
     def __init__(self, bus_address):

@@ -1,5 +1,5 @@
 doc:
-	$(MAKE) -C doc html
+	$(MAKE) -C docs html
 
 test:
 	nosetests tests
