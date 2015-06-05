@@ -27,8 +27,20 @@ setup(
     packages=find_packages(exclude=['*tests']),
     # Depends on dbus-python which is only shipped via package managers or as a
     # source dist (incompatible with distutils
-    install_requires=[],
+    install_requires=[
+        'decorator',
+    ],
     extras_require={
-        'test': ['nose']
+        'test': [
+            'nose',
+            'mock',
+            'nose-parameterized',
+        ],
+        'docs': [
+            'Sphinx',
+            'sphinxcontrib-napoleon',
+            'sphinx-rtd-theme',
+            'pygments',
+        ]
     }
 )
