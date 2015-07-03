@@ -1,23 +1,40 @@
 import unittest
 
-from mock import patch, mock_open
+from mock import patch, mock_open, Mock
 
-from pyomxplayerng.bus_finder import BusFinder
+from omxplayer.bus_finder import BusFinder
 
-
+#### CONSTANTS ####
 EXAMPLE_DBUS_FILE_CONTENTS = 'EXAMPLE_CONTENTS'
+MOCK_OPEN = mock_open(read_data=EXAMPLE_DBUS_FILE_CONTENTS)
 
 
+
+#### CLASSES ####
 class BusFinderTests(unittest.TestCase):
-    def test_stores_contents_of_omxplayer_dbus_file(self):
-        with patch('__builtin__.open', mock_open(read_data=EXAMPLE_DBUS_FILE_CONTENTS), create=True) as m:
-            bus_finder = BusFinder()
-            open.assert_called_once_with('/tmp/omxplayerdbus', 'r')
-            self.assertEqual(EXAMPLE_DBUS_FILE_CONTENTS, bus_finder.get_address())
+    dbus_file_path = '/tmp/omxplayerdbus'
 
-    def test_strips_newlines_from_file(self):
-        with patch('__builtin__.open', mock_open(read_data="  " + EXAMPLE_DBUS_FILE_CONTENTS + " \n"),
-                   create=True) as m:
-            bus_finder = BusFinder()
-            open.assert_called_once_with('/tmp/omxplayerdbus', 'r')
-            self.assertEqual(EXAMPLE_DBUS_FILE_CONTENTS, bus_finder.get_address())
+    @patch('os.path')
+    @patch('omxplayer.bus_finder.glob')
+    @patch('__builtin__.open', new=MOCK_OPEN)
+    def test_stores_contents_of_omxplayer_dbus_file(self, *args):
+        address = self.get_address()
+        self.assertEqual(EXAMPLE_DBUS_FILE_CONTENTS, address)
+
+    @patch('os.path')
+    @patch('omxplayer.bus_finder.glob')
+    @patch('__builtin__.open', new=MOCK_OPEN)
+    def test_waits_for_file_to_exist(self, glob, mock_os_path):
+        self.get_address()
+        mock_os_path.isfile.assert_called_once_with(self.dbus_file_path)
+
+    @patch('os.path')
+    @patch('omxplayer.bus_finder.glob')
+    @patch('__builtin__.open', new=MOCK_OPEN)
+    def test_waits_for_file_to_be_written_to(self, glob, mock_os_path):
+        self.get_address()
+        mock_os_path.getsize.assert_called_once_with(self.dbus_file_path)
+
+    def get_address(self):
+        bus_finder = BusFinder(path=self.dbus_file_path)
+        return bus_finder.get_address()

@@ -1,0 +1,18 @@
+# Container based building is disabled by default, if you explicitly
+# state you're not doing any superuser stuff then travis will use a
+# container which then allows you to cache things
+sudo: false
+language: python
+python:
+    - 2.7_with_system_site_packages
+cache:
+    - pip
+    - apt
+addons:
+  apt:
+    packages:
+      - python-dbus
+      - python3-dbus
+install:
+    - pip install -r requirements.txt
+script: nosetests ./tests

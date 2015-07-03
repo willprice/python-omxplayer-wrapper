@@ -4,7 +4,7 @@ from nose_parameterized import parameterized
 from mock import patch, Mock
 from dbus import DBusException
 
-from pyomxplayerng.dbus_connection import DBusConnection, DBusConnectionError
+from omxplayer.dbus_connection import DBusConnection, DBusConnectionError
 
 
 @patch('dbus.bus.BusConnection')
@@ -27,9 +27,10 @@ class DBusConnectionTests(unittest.TestCase):
         BusConnection.return_value = self.bus
         self.create_example_dbus_connection()
 
-        self.bus.get_object.assert_called_once_with('org.mpris.MediaPlayer2.omxplayer',
-                                                    '/org/mpris/MediaPlayer2',
-                                                    introspect=False)
+        self.bus.get_object.assert_called_once_with(
+            'org.mpris.MediaPlayer2.omxplayer',
+            '/org/mpris/MediaPlayer2',
+            introspect=False)
 
     @parameterized.expand([
         ['org.mpris.MediaPlayer2'],
@@ -55,8 +56,9 @@ class DBusConnectionTests(unittest.TestCase):
             properties_interface = Mock()
             Interface.return_value = properties_interface
             connection = self.create_example_dbus_connection()
-            self.assertEqual(properties_interface, connection.properties_interface)
-            
+            self.assertEqual(properties_interface,
+                             connection.properties_interface)
+
     def test_constructs_player_interface(self, *args):
         with patch('dbus.Interface') as Interface:
             player_interface = Mock()
