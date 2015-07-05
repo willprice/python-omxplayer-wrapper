@@ -44,7 +44,7 @@ class OMXPlayer(object):
         filename (str): Path to the file you wish to play
 
         args (list): used to pass options to omxplayer, e.g.
-        args="--no-osd" is equivalent to the command line
+        args=["--no-osd"] is equivalent to the command line
         omxplayer --no-osd
 
     """
