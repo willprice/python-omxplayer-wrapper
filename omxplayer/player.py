@@ -61,7 +61,7 @@ class OMXPlayer(object):
 
         self.tries = 0
         self._is_playing = True
-	self._filename = filename
+        self._filename = filename
         self._process = self._setup_omxplayer_process(filename)
         self.connection = self._setup_dbus_connection(Connection,
                                                      bus_address_finder)
@@ -429,14 +429,14 @@ class OMXPlayer(object):
             logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
         except OSError:
             logger.error('Could not find the process to kill')
- 
+
     @_check_player_is_active
     def get_filename(self):
         """
         Returns:
             str: filename currently playing
         """
-	return str(self._filename)
+	return self._filename
 
 
 #  MediaPlayer2.Player types:
