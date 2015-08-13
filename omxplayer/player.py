@@ -436,7 +436,7 @@ class OMXPlayer(object):
         Returns:
             str: filename currently playing
         """
-    return self._filename
+        return self._filename
 
 
 #  MediaPlayer2.Player types:
