@@ -435,7 +435,7 @@ class OMXPlayer(object):
         except OSError:
             logger.error('Could not find the process to kill')
         try:
-            os.kill(self.dbus_pid, signal.SIGTERM)
+            os.kill(int(self.dbus_pid), signal.SIGTERM)
         except OSError:
             logger.error('Could not find the Dbus process to kill')
 
