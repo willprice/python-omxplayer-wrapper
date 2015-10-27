@@ -438,6 +438,8 @@ class OMXPlayer(object):
             os.kill(int(self.dbus_pid), signal.SIGTERM)
         except OSError:
             logger.error('Could not find the Dbus process to kill')
+        except:
+            pass
 
     @_check_player_is_active
     def get_filename(self):
