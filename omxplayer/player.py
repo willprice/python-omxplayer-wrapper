@@ -427,7 +427,7 @@ class OMXPlayer(object):
     def quit(self):
         logger.debug('Quitting OMXPlayer')
         try:
-            os.killpg(self._process.pid, signal.SIGTERM)
+            os.killpg(self._process.pid, signal.SIGINT)
             self._process.wait()
             self._process_monitor.join()
             logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
