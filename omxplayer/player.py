@@ -430,7 +430,7 @@ class OMXPlayer(object):
             os.killpg(self._process.pid, signal.SIGINT)
             self._process.wait()
             self._process_monitor.join()
-            logger.debug('SIGTERM Sent to pid: %s' % self._process.pid)
+            logger.debug('SIGINT Sent to pid: %s' % self._process.pid)
         except OSError:
             logger.error('Could not find the process to kill')
 
