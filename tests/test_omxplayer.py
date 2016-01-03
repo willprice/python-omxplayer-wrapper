@@ -89,7 +89,7 @@ class OMXPlayerTests(unittest.TestCase):
         popen.return_value = omxplayer_process
         self.patch_and_run_omxplayer()
         self.player.quit()
-        killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
+        killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGINT)
 
     def test_quitting_waits_for_omxplayer_to_die(self, popen, sleep, isfile, killpg, *args):
         omxplayer_process = Mock()
