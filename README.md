@@ -41,6 +41,22 @@ player.pause()
 player.quit()
 ```
 
+Playing a file from a URL (courtesy of @jappe999)
+```python
+import urllib
+from omxplayer import OMXPlayer
+
+file_name = YOUR_FILE_URL
+
+try:
+        urllib.urlretrieve(file_name, 'file.mp3')
+        player = OMXPlayer('file.mp3', ['-o', 'local'])
+        player.play()
+except Exception as e:
+        print e
+player.quit()
+```
+
 ## Docs
 You can read the docs here:
 [python-omxplayer-wrapper.rtfd.org](http://python-omxplayer-wrapper.rtfd.org)
