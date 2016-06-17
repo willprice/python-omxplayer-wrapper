@@ -54,7 +54,7 @@ try:
         player.play()
 except Exception as e:
         print e
-player.quit()
+
 ```
 
 ## Docs
