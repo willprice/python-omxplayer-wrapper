@@ -9,6 +9,11 @@ Status](https://travis-ci.org/willprice/python-omxplayer-wrapper.svg)](https://t
 > Control OMXPlayer from Python on the Raspberry Pi.
 
 ## Install
+Make sure dbus is installed:
+```shell
+$ sudo apt-get install python-dbus
+```
+
 For someone who just wants to use the package:
 ```shell
 $ python setup.py install
