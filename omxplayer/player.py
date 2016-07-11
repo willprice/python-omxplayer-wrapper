@@ -5,6 +5,7 @@ import signal
 import logging
 import threading
 import math
+import urlparse
 
 from decorator import decorator
 from glob import glob
@@ -35,7 +36,7 @@ class OMXPlayer(object):
     This works by speaking to OMXPlayer over DBus sending messages.
 
     Args:
-        filename (str): Path to the file you wish to play
+        filename (str): Path to the file or URL you wish to play
         args (list): used to pass option parameters to omxplayer.  see: https://github.com/popcornmix/omxplayer#synopsis
 
 
@@ -102,7 +103,8 @@ class OMXPlayer(object):
 
     def _setup_omxplayer_process(self, filename):
             logger.debug('Setting up OMXPlayer process')
-            if not os.path.isfile(filename):
+            filename_url = urlparse.urlsplit(filename)
+            if not filename_url.scheme and not os.path.isfile(filename):
                 raise FileNotFoundError("Could not find: {}".format(filename))
             with open(os.devnull, 'w') as devnull:
                 process = self._run_omxplayer(filename, devnull)
