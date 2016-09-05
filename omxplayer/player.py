@@ -10,7 +10,7 @@ from decorator import decorator
 from glob import glob
 from dbus import DBusException, Int64, ObjectPath
 
-import omxplayer.bus_finder
+from omxplayer.bus_finder import BusFinder
 from omxplayer.dbus_connection import DBusConnection, \
                                       DBusConnectionError
 
@@ -54,23 +54,24 @@ class OMXPlayer(object):
                  cleaner=FileCleaner('/tmp/*omxplayer*')):
         logger.debug('Instantiating OMXPlayer')
         self.cleaner = cleaner
-        self._clean_old_files()
-
         self.args = args
-
-        if not bus_address_finder:
-            bus_address_finder = omxplayer.bus_finder.BusFinder()
-        if not Connection:
-            Connection = DBusConnection
-
         self.tries = 0
         self._is_playing = True
         self._filename = filename
+        self.Connection = Connection if Connection else DBusConnection
+        self.bus_address_finder = bus_address_finder if bus_address_finder else BusFinder()
+
+        self._process = None
+        self.connection = None
+        self.load(filename)
+
+    def _load_file(self, filename):
+        if self._process:
+            self.quit()
+
+        self._clean_old_files()
         self._process = self._setup_omxplayer_process(filename)
-        self.connection = self._setup_dbus_connection(Connection,
-                                                     bus_address_finder)
-        time.sleep(0.5)  # Wait for the DBus interface to be initialised
-        self.pause()
+        self.connection = self._setup_dbus_connection(self.Connection, self.bus_address_finder)
 
     def _clean_old_files(self):
         logger.debug("Removing old OMXPlayer pid files etc")
@@ -136,6 +137,12 @@ class OMXPlayer(object):
                 logger.info('Process is no longer alive, can\'t run command')
 
         return decorator(wrapped, fn)
+
+    def load(self, file_path):
+        self._filename = file_path
+        self._load_file(file_path)
+        time.sleep(0.5)  # Wait for the DBus interface to be initialised
+        self.pause()
 
     """ ROOT INTERFACE METHODS """
 
@@ -433,6 +440,8 @@ class OMXPlayer(object):
             logger.debug('SIGINT Sent to pid: %s' % self._process.pid)
         except OSError:
             logger.error('Could not find the process to kill')
+
+        self._process = None
 
     @_check_player_is_active
     def get_filename(self):
