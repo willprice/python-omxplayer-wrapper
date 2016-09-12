@@ -9,6 +9,11 @@ addons:
     packages:
       - python-dbus
       - python3-dbus
+
+env:
+  global:
 install:
-    - pip install -r requirements.txt
-script: nosetests ./tests
+  - pip install -r requirements.txt
+script: nosetests --with-coverage --cover-xml --cover-package=omxplayer tests
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
