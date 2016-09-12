@@ -110,7 +110,6 @@ class OMXPlayer(object):
             logger.debug('DBus connect attempt: {}'.format(self.tries))
             try:
                 connection = Connection(bus_address_finder.get_address())
-                self.dbus_pid = bus_address_finder.get_process()
                 logger.debug(
                     'Connected to OMXPlayer at DBus address: %s' % connection)
                 return connection
@@ -434,12 +433,6 @@ class OMXPlayer(object):
             logger.debug('SIGINT Sent to pid: %s' % self._process.pid)
         except OSError:
             logger.error('Could not find the process to kill')
-        try:
-            os.kill(int(self.dbus_pid), signal.SIGTERM)
-        except OSError:
-            logger.error('Could not find the Dbus process to kill')
-        except:
-            pass
 
     @_check_player_is_active
     def get_filename(self):
@@ -448,9 +441,6 @@ class OMXPlayer(object):
             str: filename currently playing
         """
         return self._filename
-
-    def __del__(self):
-        self.quit()
 
 
 #  MediaPlayer2.Player types:
