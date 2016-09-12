@@ -3,7 +3,13 @@ check: test
 
 .PHONY: test
 test:
-	tox
+	nosetests --with-coverage \
+              --cover-erase \
+              --cover-xml \
+              --cover-html \
+              --cover-branches \
+              --cover-package=omxplayer \
+              tests
 
 .PHONY: doc
 doc:
