@@ -18,6 +18,18 @@ A **MINIMAL** example of how to reproduce the example, don't post the contents
 of your whole file. Take the time to trim it down to the minimal number of steps
 required
 
+## Environment details
+* OS (`lsb_release -a`):
+```
+Distributor ID: Raspbian
+Description:    Raspbian GNU/Linux 8.0 (jessie)
+Release:        8.0
+Codename:       jessie
+```
+* `python-dbus` Version (`dpkg -s python-dbus`):  `1.2.0`
+* `python` Version (`python --version`): `Python 2.7.9`
+* `omxplayer` Version (`omxplayer --version`): `6c90c75`
+
 
 -------
 
