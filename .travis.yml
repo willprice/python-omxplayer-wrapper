@@ -14,6 +14,7 @@ env:
   global:
 install:
   - pip install -r requirements.txt
-script: nosetests --with-coverage --cover-xml --cover-package=omxplayer tests
+script:
+  - make check
 after_success:
   - bash <(curl -s https://codecov.io/bash)
