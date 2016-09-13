@@ -90,8 +90,8 @@ class OMXPlayer(object):
         process = subprocess.Popen(command,
                                    stdout=devnull,
                                    preexec_fn=os.setsid)
-        self._process_monitor = threading.Thread(target=monitor, args=(process,
-                                                               on_exit))
+        self._process_monitor = threading.Thread(target=monitor,
+                                                 args=(process, on_exit))
         self._process_monitor.start()
         return process
 
