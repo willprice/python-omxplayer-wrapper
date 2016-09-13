@@ -137,10 +137,94 @@ class OMXPlayerTests(unittest.TestCase):
         command(*args)
 
     # Must have the prefix 'patch' for the decorators to take effect
-    def patch_and_run_omxplayer(self, Connection=Mock()):
+    def patch_and_run_omxplayer(self, Connection=Mock(), active=False):
         bus_address_finder = Mock()
         bus_address_finder.get_address.return_val = "example_bus_address"
         self.player = OMXPlayer(self.TEST_FILE_NAME,
                                 bus_address_finder=bus_address_finder,
                                 Connection=Connection,
                                 cleaner=Mock())
+        if active:
+            self.player._process.poll = Mock(return_value=None)
+
+    def test_stop_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+                
+        def callback(player):
+            self.callback_value = player
+
+        self.player.stopEvent += callback
+        self.callback_value = None
+        self.player.stop()
+        self.assertEqual(self.callback_value, self.player)
+
+    def test_play_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+
+        def callback(player):
+            self.callback_value = player
+        
+        self.player.playEvent += callback
+        self.callback_value = None
+        self.player.play()
+        self.assertEqual(self.callback_value, self.player)
+
+    def test_play_event_by_play_pause(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+
+        def callback(player):
+            self.callback_value = player
+
+        self.assertEqual(self.player._is_playing, True)
+        # self.player._is_playing = True
+        self.player.pause()
+        self.player.playEvent += callback
+        self.callback_value = None
+        self.assertEqual(self.player._is_playing, False)
+        self.player.play_pause()
+        self.assertEqual(self.callback_value, self.player)
+
+    def test_pause_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+
+        def callback(player):
+            self.callback_value = player
+        
+        self.player.pauseEvent += callback
+        self.callback_value = None
+        self.player.pause()
+        self.assertEqual(self.callback_value, self.player)
+
+    def test_pause_event_by_play_pause(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+
+        def callback(player):
+            self.callback_value = player
+        
+        self.player.play() # make sure its playing
+        self.player.pauseEvent += callback
+        self.callback_value = None
+        self.player.play_pause() # toggle to pause
+        self.assertEqual(self.callback_value, self.player)
+
+    def test_seek_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+
+        def callback(player, position):
+            self.callback_value = (player, position)
+        
+        self.player.seekEvent += callback
+        self.callback_value = None
+        self.player.seek(3.4)
+        self.assertEqual(self.callback_value, (self.player, 3.4))
+
+    def test_position_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+
+        def callback(player, position):
+            self.callback_value = (player, position)
+        
+        self.player.positionEvent += callback
+        self.callback_value = None
+        self.player.set_position(5.01)
+        self.assertEqual(self.callback_value, (self.player, 5.01))

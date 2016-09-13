@@ -316,6 +316,7 @@ class OMXPlayer(object):
             None:
         """
         self._get_player_interface().Pause()
+        self._is_playing = False
         self.pauseEvent(self)
 
     @_check_player_is_active
@@ -431,6 +432,7 @@ class OMXPlayer(object):
         """
         if not self.is_playing():
             self.play_pause()
+            self._is_playing = True
             self.playEvent(self)
 
     def _get_root_interface(self):
