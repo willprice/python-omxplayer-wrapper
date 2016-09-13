@@ -443,6 +443,8 @@ class OMXPlayer(object):
 
         self._process = None
 
+        self._process = None
+
     @_check_player_is_active
     def get_filename(self):
         """
