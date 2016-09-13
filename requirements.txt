@@ -16,3 +16,4 @@ snowballstemmer==1.2.0
 Sphinx==1.2.3
 sphinx-rtd-theme==0.1.7
 sphinxcontrib-napoleon==0.3.3
+evento==1.0.0

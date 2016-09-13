@@ -14,7 +14,7 @@ import omxplayer.bus_finder
 from omxplayer.dbus_connection import DBusConnection, \
                                       DBusConnectionError
 
-from event import Event
+from evento import Event
 
 #### CONSTANTS ####
 RETRY_DELAY = 0.05
