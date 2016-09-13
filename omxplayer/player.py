@@ -60,11 +60,18 @@ class OMXPlayer(object):
         self.tries = 0
         self._is_playing = True
         self._filename = filename
-        self.Connection = Connection if Connection else DBusConnection
-        self.bus_address_finder = bus_address_finder if bus_address_finder else BusFinder()
+        self._Connection = Connection if Connection else DBusConnection
+        self._bus_address_finder = bus_address_finder if bus_address_finder else BusFinder()
+
+        # events
+        self.pauseEvent = Event()
+        self.playEvent = Event()
+        self.stopEvent = Event()
+        self.seekEvent = Event()
+        self.positionEvent = Event()
 
         self._process = None
-        self.connection = None
+        self._connection = None
         self.load(filename)
 
     def _load_file(self, filename):
@@ -73,14 +80,7 @@ class OMXPlayer(object):
 
         self._clean_old_files()
         self._process = self._setup_omxplayer_process(filename)
-        self.connection = self._setup_dbus_connection(self.Connection, self.bus_address_finder)
-
-        # events
-        self.pauseEvent = Event()
-        self.playEvent = Event()
-        self.stopEvent = Event()
-        self.seekEvent = Event()
-        self.positionEvent = Event()
+        self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
     def _clean_old_files(self):
         logger.debug("Removing old OMXPlayer pid files etc")
@@ -443,13 +443,13 @@ class OMXPlayer(object):
             self.playEvent(self)
 
     def _get_root_interface(self):
-        return self.connection.root_interface
+        return self._connection.root_interface
 
     def _get_player_interface(self):
-        return self.connection.player_interface
+        return self._connection.player_interface
 
     def _get_properties_interface(self):
-        return self.connection.properties_interface
+        return self._connection.properties_interface
 
     def quit(self):
         logger.debug('Quitting OMXPlayer')
