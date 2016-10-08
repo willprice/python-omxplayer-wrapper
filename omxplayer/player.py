@@ -10,7 +10,7 @@ from decorator import decorator
 from glob import glob
 from dbus import DBusException, Int64, ObjectPath
 
-import omxplayer.bus_finder
+from omxplayer.bus_finder import BusFinder
 from omxplayer.dbus_connection import DBusConnection, \
                                       DBusConnectionError
 
@@ -51,20 +51,11 @@ class OMXPlayer(object):
         logger.debug('Instantiating OMXPlayer')
 
         self.args = args
-
-        if not bus_address_finder:
-            bus_address_finder = omxplayer.bus_finder.BusFinder()
-        if not Connection:
-            Connection = DBusConnection
-
         self.tries = 0
         self._is_playing = True
         self._filename = filename
-        self._process = self._setup_omxplayer_process(filename)
-        self.connection = self._setup_dbus_connection(Connection,
-                                                     bus_address_finder)
-        time.sleep(0.5)  # Wait for the DBus interface to be initialised
-        self.pause()
+        self._Connection = Connection if Connection else DBusConnection
+        self._bus_address_finder = bus_address_finder if bus_address_finder else BusFinder()
 
         #: Event called on pause ``callback(player)``
         self.pauseEvent = Event()
@@ -76,6 +67,17 @@ class OMXPlayer(object):
         self.seekEvent = Event()
         #: Event called on setting position ``callback(player, absolute_position)``
         self.positionEvent = Event()
+
+        self._process = None
+        self._connection = None
+        self.load(filename)
+
+    def _load_file(self, filename):
+        if self._process:
+            self.quit()
+
+        self._process = self._setup_omxplayer_process(filename)
+        self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
     def _run_omxplayer(self, filename, devnull):
         def on_exit():
@@ -138,6 +140,19 @@ class OMXPlayer(object):
                 logger.info('Process is no longer alive, can\'t run command')
 
         return decorator(wrapped, fn)
+
+    def load(self, file_path):
+        """
+        Loads a new file from ``file_path`` by killing the current
+        ``omxplayer`` process and forking a new one.
+
+        Args:
+            file_path (string): Path to the file to play
+        """
+        self._filename = file_path
+        self._load_file(file_path)
+        time.sleep(0.5)  # Wait for the DBus interface to be initialised
+        self.pause()
 
     """ ROOT INTERFACE METHODS """
 
@@ -429,13 +444,13 @@ class OMXPlayer(object):
             self.playEvent(self)
 
     def _get_root_interface(self):
-        return self.connection.root_interface
+        return self._connection.root_interface
 
     def _get_player_interface(self):
-        return self.connection.player_interface
+        return self._connection.player_interface
 
     def _get_properties_interface(self):
-        return self.connection.properties_interface
+        return self._connection.properties_interface
 
     def quit(self):
         try:
@@ -446,6 +461,10 @@ class OMXPlayer(object):
             self._process_monitor.join()
         except OSError:
             logger.error('Could not find the process to kill')
+
+        self._process = None
+
+        self._process = None
 
     @_check_player_is_active
     def get_filename(self):

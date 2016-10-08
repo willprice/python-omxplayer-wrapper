@@ -213,3 +213,24 @@ class OMXPlayerTests(unittest.TestCase):
                                 Connection=Connection)
         if active:
             self.player._process.poll = Mock(return_value=None)
+
+    def test_load(self, popen, sleep, isfile, killpg, *args):
+        omxplayer_process = Mock()
+        popen.return_value = omxplayer_process
+        with patch('os.getpgid', Mock(return_value=omxplayer_process.pid)):
+            self.patch_and_run_omxplayer(active=True)
+            # initial load
+            self.assertEqual(self.player.get_filename(), './test.mp4')
+            killpg.assert_not_called()
+            popen.assert_called_once_with(['omxplayer', './test.mp4'],
+                                        preexec_fn=os.setsid,
+                                        stdin=MOCK_OPEN(),
+                                        stdout=MOCK_OPEN())
+            # load new video in same OMXPlayer instance
+            self.player.load('./test2.mp4')
+            # verify new video is registered in OMXPlayer
+            self.assertEqual(self.player.get_filename(), './test2.mp4')
+            # verify omxplayer process for previous video was killed
+            killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
+            # verify a new process was started for the second time
+            self.assertEqual(popen.call_count, 2)
