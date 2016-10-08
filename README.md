@@ -24,6 +24,10 @@ If you're feeling helpful, and decide to help develop the package:
 ```shell
 $ python setup.py develop
 ```
+There's also an Ansible playbook in `devenv` which will set up a raspberry pi
+with omxplayer-wrapper in develop mode (located at
+`/usr/src/omxplayer-wrapper`) which can be used by running `./devenv/deploy.sh`
+
 This will install via symlinks so that you can continue to work on it locally
 but import it from other python packages
 
