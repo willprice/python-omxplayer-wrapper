@@ -26,14 +26,6 @@ logger = logging.getLogger(__name__)
 class FileNotFoundError(Exception):
     pass
 
-class FileCleaner(object):
-    def __init__(self, path):
-        self.path = path
-
-    def clean(self):
-        for file in glob(self.path):
-            os.remove(file)
-
 class OMXPlayer(object):
     """
     OMXPlayer controller
@@ -50,11 +42,8 @@ class OMXPlayer(object):
     def __init__(self, filename,
                  args=[],
                  bus_address_finder=None,
-                 Connection=None,
-                 cleaner=FileCleaner('/tmp/*omxplayer*')):
+                 Connection=None):
         logger.debug('Instantiating OMXPlayer')
-        self.cleaner = cleaner
-        self._clean_old_files()
 
         self.args = args
 
@@ -71,10 +60,6 @@ class OMXPlayer(object):
                                                      bus_address_finder)
         time.sleep(0.5)  # Wait for the DBus interface to be initialised
         self.pause()
-
-    def _clean_old_files(self):
-        logger.debug("Removing old OMXPlayer pid files etc")
-        self.cleaner.clean()
 
     def _run_omxplayer(self, filename, devnull):
         def on_exit():
