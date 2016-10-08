@@ -138,5 +138,4 @@ class OMXPlayerTests(unittest.TestCase):
         bus_address_finder.get_address.return_val = "example_bus_address"
         self.player = OMXPlayer(self.TEST_FILE_NAME,
                                 bus_address_finder=bus_address_finder,
-                                Connection=Connection,
-                                cleaner=Mock())
+                                Connection=Connection)
