@@ -88,6 +88,7 @@ class OMXPlayer(object):
         command = ['omxplayer'] + self.args + [filename]
         logger.debug("Opening omxplayer with the command: %s" % command)
         process = subprocess.Popen(command,
+                                   stdin=devnull,
                                    stdout=devnull,
                                    preexec_fn=os.setsid)
         self._process_monitor = threading.Thread(target=monitor,
