@@ -1,0 +1,4 @@
+[raspberrypi]
+raspberrypi     ansible_user=pi
+
+# vim: set ft=dosini:

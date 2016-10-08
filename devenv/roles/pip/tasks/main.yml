@@ -1,0 +1,11 @@
+---
+- name: Install pip
+  apt:
+    name: "{{ pip_package }}"
+    cache_valid_time: "{{ apt_cache_valid_time }}"
+    state: latest
+
+- name: Install pip packages
+  pip:
+    name: "{{ item }}"
+  with_items: "{{ pip_packages }}"

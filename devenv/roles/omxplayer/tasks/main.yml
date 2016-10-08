@@ -1,0 +1,4 @@
+- name: Install omxplayer
+  apt:
+    name: "{{ omxplayer_package }}"
+    cache_valid_time: "{{ apt_cache_valid_time }}"

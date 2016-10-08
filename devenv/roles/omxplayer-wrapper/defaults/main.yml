@@ -1,0 +1,2 @@
+omxplayer_wrapper_parent_path: /usr/src
+omxplayer_wrapper_root: "{{ omxplayer_wrapper_parent_path }}/omxplayer"

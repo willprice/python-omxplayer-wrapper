@@ -1,0 +1,7 @@
+---
+- hosts: raspberrypi
+  become: yes
+  roles:
+    - pip
+    - omxplayer
+    - omxplayer-wrapper

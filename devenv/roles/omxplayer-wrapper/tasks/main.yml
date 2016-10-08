@@ -1,0 +1,28 @@
+- name: Create omxplayer-wrapper parent path
+  file:
+    path: "{{ omxplayer_wrapper_parent_path }}"
+    owner: "{{ ansible_user }}"
+    state: directory
+
+- name: Copy omxplayer-wrapper to omxplayer-wrapper parent path
+  synchronize:
+    src: "{{ playbook_dir }}/../"
+    dest: "{{ omxplayer_wrapper_root }}/"
+
+- name: Set permissions on omxplayer-wrapper
+  file:
+    path: "{{ omxplayer_wrapper_root }}"
+    owner: "{{ ansible_user }}"
+    state: directory
+    recurse: yes
+
+- name: Install omxplayer-wrapper dependencies
+  pip:
+    requirements: "{{ omxplayer_wrapper_root }}/requirements.txt"
+    state: present
+
+- name: Setup omxplayer-wrapper for development
+  command: python setup.py develop
+  args:
+    chdir: "{{ omxplayer_wrapper_root }}"
+    creates: /usr/local/lib/python2.7/dist-packages/omxplayer-wrapper.egg-link
