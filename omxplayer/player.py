@@ -8,7 +8,7 @@ import math
 
 from decorator import decorator
 from glob import glob
-from dbus import DBusException, Int64, ObjectPath
+from dbus import DBusException, Int64, String, ObjectPath
 
 from omxplayer.bus_finder import BusFinder
 from omxplayer.dbus_connection import DBusConnection, \
@@ -362,6 +362,40 @@ class OMXPlayer(object):
         """
         self._get_player_interface().SetPosition(ObjectPath("/not/used"), Int64(position*1000*1000))
         self.positionEvent(self, position)
+
+    @_check_player_is_active
+    def set_alpha(self, alpha):
+        """
+        Args:
+            alpha (float): The transparency (0..255)
+        """
+        self._get_player_interface().SetAlpha(ObjectPath('/not/used'), Int64(alpha))
+
+    @_check_player_is_active
+    def set_aspect_mode(self, mode):
+        """
+        Args:
+            mode (str): One of ("letterbox" | "fill" | "stretch")
+        """
+        self._get_player_interface().SetAspectMode(ObjectPath('/not/used'), String(mode))
+
+    @_check_player_is_active
+    def set_video_pos(self, x1, y1, x2, y2):
+        """
+        Args:
+            Image position (int, int, int, int):
+        """
+        position = "%s %s %s %s" % (str(x1),str(y1),str(x2),str(y2))
+        self._get_player_interface().VideoPos(ObjectPath('/not/used'), String(position))
+
+    @_check_player_is_active
+    def set_video_crop(self, x1, y1, x2, y2):
+        """
+        Args:
+            Image position (int, int, int, int):
+        """
+        crop = "%s %s %s %s" % (str(x1),str(y1),str(x2),str(y2))
+        self._get_player_interface().SetVideoCropPos(ObjectPath('/not/used'), String(crop))
 
     @_check_player_is_active
     def list_video(self):
