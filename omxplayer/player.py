@@ -14,6 +14,8 @@ import omxplayer.bus_finder
 from omxplayer.dbus_connection import DBusConnection, \
                                       DBusConnectionError
 
+from evento import Event
+
 #### CONSTANTS ####
 RETRY_DELAY = 0.05
 
@@ -34,10 +36,13 @@ class OMXPlayer(object):
 
     Args:
         filename (str): Path to the file you wish to play
-        args (list): used to pass option parameters to omxplayer.
-        multiple argument example:
-        # OMXPlayer('path.mp4', args=['--no-osd', '--no-keys', '-b'])
-        info: https://github.com/popcornmix/omxplayer#synopsis
+        args (list): used to pass option parameters to omxplayer.  see: https://github.com/popcornmix/omxplayer#synopsis
+
+
+    Multiple argument example:
+
+    >>> OMXPlayer('path.mp4', args=['--no-osd', '--no-keys', '-b'])
+
     """
     def __init__(self, filename,
                  args=[],
@@ -60,6 +65,17 @@ class OMXPlayer(object):
                                                      bus_address_finder)
         time.sleep(0.5)  # Wait for the DBus interface to be initialised
         self.pause()
+
+        #: Event called on pause ``callback(player)``
+        self.pauseEvent = Event()
+        #: Event called on play ``callback(player)``
+        self.playEvent = Event()
+        #: Event called on stop ``callback(player)``
+        self.stopEvent = Event()
+        #: Event called on seek ``callback(player, relative_position)``
+        self.seekEvent = Event()
+        #: Event called on setting position ``callback(player, absolute_position)``
+        self.positionEvent = Event()
 
     def _run_omxplayer(self, filename, devnull):
         def on_exit():
@@ -293,6 +309,8 @@ class OMXPlayer(object):
             None:
         """
         self._get_player_interface().Pause()
+        self._is_playing = False
+        self.pauseEvent(self)
 
     @_check_player_is_active
     def play_pause(self):
@@ -302,10 +320,15 @@ class OMXPlayer(object):
         """
         self._get_player_interface().PlayPause()
         self._is_playing = not self._is_playing
+        if self._is_playing:
+            self.playEvent(self)
+        else:
+            self.pauseEvent(self)
 
     @_check_player_is_active
     def stop(self):
         self._get_player_interface().Stop()
+        self.stopEvent(self)
 
     @_check_player_is_active
     def seek(self, relative_position):
@@ -314,6 +337,7 @@ class OMXPlayer(object):
             relative_position (float): The position in seconds to seek to.
         """
         self._get_player_interface().Seek(Int64(relative_position))
+        self.seekEvent(self, relative_position)
 
     @_check_player_is_active
     def set_position(self, position):
@@ -322,6 +346,7 @@ class OMXPlayer(object):
             position (float): The position in seconds.
         """
         self._get_player_interface().SetPosition(ObjectPath("/not/used"), Int64(position*1000*1000))
+        self.positionEvent(self, position)
 
     @_check_player_is_active
     def list_video(self):
@@ -400,6 +425,8 @@ class OMXPlayer(object):
         """
         if not self.is_playing():
             self.play_pause()
+            self._is_playing = True
+            self.playEvent(self)
 
     def _get_root_interface(self):
         return self.connection.root_interface

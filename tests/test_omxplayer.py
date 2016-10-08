@@ -38,7 +38,6 @@ class OMXPlayerTests(unittest.TestCase):
             self.patch_and_run_omxplayer(Connection=dbus_connection)
             self.assertEqual(50, self.player.tries)
 
-
     @parameterized.expand([
         ['can_quit', 'CanQuit', [], []],
         ['can_set_fullscreen', 'CanSetFullscreen', [], []],
@@ -117,6 +116,79 @@ class OMXPlayerTests(unittest.TestCase):
             self.patch_and_run_omxplayer()
             ospath.isfile.assert_called_once_with(self.TEST_FILE_NAME)
 
+    def test_stop_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+        callback = Mock()
+        self.player.stopEvent += callback
+
+        self.player.stop()
+
+        callback.assert_called_once_with(self.player)
+
+    def test_play_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+        callback = Mock()
+        self.player.playEvent += callback
+
+        with patch.object(self.player, 'is_playing', return_value=False):
+            self.player.play()
+
+            callback.assert_called_once_with(self.player)
+
+    def test_pause_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+        callback = Mock()
+        self.player.pauseEvent += callback
+
+        with patch.object(self.player, 'is_playing', return_value=True):
+            self.player.pause()
+
+            callback.assert_called_once_with(self.player)
+
+    def test_play_event_by_play_pause(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+        callback = Mock()
+        self.player.playEvent += callback
+
+        with patch.object(self.player, 'is_playing', return_value=False):
+            self.player.pause()
+
+            # play
+            self.player.play_pause()
+
+            callback.assert_called_once_with(self.player)
+
+    def test_pause_event_by_play_pause(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+        callback = Mock()
+        self.player.pauseEvent += callback
+
+        with patch.object(self.player, 'is_playing', return_value=True):
+            self.player.play()
+
+            # pause
+            self.player.play_pause()
+
+            callback.assert_called_once_with(self.player)
+
+    def test_seek_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+        callback = Mock()
+        self.player.seekEvent += callback
+
+        self.player.seek(3.4)
+
+        callback.assert_called_once_with(self.player, 3.4)
+
+    def test_position_event(self, *args):
+        self.patch_and_run_omxplayer(active=True)
+        callback = Mock()
+        self.player.positionEvent += callback
+
+        self.player.set_position(5.01)
+
+        callback.assert_called_once_with(self.player, 5.01)
+
     def patch_interface_and_run_command(self, interface_name,
                                         command_name, interface_command_name,
                                         command_args,
@@ -133,9 +205,11 @@ class OMXPlayerTests(unittest.TestCase):
         command(*args)
 
     # Must have the prefix 'patch' for the decorators to take effect
-    def patch_and_run_omxplayer(self, Connection=Mock()):
+    def patch_and_run_omxplayer(self, Connection=Mock(), active=False):
         bus_address_finder = Mock()
         bus_address_finder.get_address.return_val = "example_bus_address"
         self.player = OMXPlayer(self.TEST_FILE_NAME,
                                 bus_address_finder=bus_address_finder,
                                 Connection=Connection)
+        if active:
+            self.player._process.poll = Mock(return_value=None)
