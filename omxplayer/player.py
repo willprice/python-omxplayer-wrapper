@@ -36,10 +36,13 @@ class OMXPlayer(object):
 
     Args:
         filename (str): Path to the file you wish to play
-        args (list): used to pass option parameters to omxplayer.
-        multiple argument example:
-        # OMXPlayer('path.mp4', args=['--no-osd', '--no-keys', '-b'])
-        info: https://github.com/popcornmix/omxplayer#synopsis
+        args (list): used to pass option parameters to omxplayer.  see: https://github.com/popcornmix/omxplayer#synopsis
+
+
+    Multiple argument example:
+
+    >>> OMXPlayer('path.mp4', args=['--no-osd', '--no-keys', '-b'])
+
     """
     def __init__(self, filename,
                  args=[],
@@ -63,11 +66,15 @@ class OMXPlayer(object):
         time.sleep(0.5)  # Wait for the DBus interface to be initialised
         self.pause()
 
-        # events
+        #: Event called on pause ``callback(player)``
         self.pauseEvent = Event()
+        #: Event called on play ``callback(player)``
         self.playEvent = Event()
+        #: Event called on stop ``callback(player)``
         self.stopEvent = Event()
+        #: Event called on seek ``callback(player, relative_position)``
         self.seekEvent = Event()
+        #: Event called on setting position ``callback(player, absolute_position)``
         self.positionEvent = Event()
 
     def _run_omxplayer(self, filename, devnull):
