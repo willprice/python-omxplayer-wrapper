@@ -7,7 +7,7 @@ setup(
     author_email='will.price94+dev@gmail.com',
     url='https://github.com/willprice/python-omxplayer-wrapper',
 
-    version='0.0.2',
+    version='0.1.0',
 
     description='Control OMXPlayer on the Raspberry Pi',
     long_description='Control OMXPlayer on the Raspberry Pi through DBus',
@@ -29,11 +29,12 @@ setup(
     # source dist (incompatible with distutils
     install_requires=[
         'decorator',
+        'evento'
     ],
     extras_require={
         'test': [
-            'nose',
             'mock',
+            'nose',
             'nose-parameterized',
         ],
         'docs': [
