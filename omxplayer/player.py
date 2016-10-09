@@ -47,7 +47,8 @@ class OMXPlayer(object):
     def __init__(self, filename,
                  args=[],
                  bus_address_finder=None,
-                 Connection=None):
+                 Connection=None,
+                 pause=True):
         logger.debug('Instantiating OMXPlayer')
 
         self.args = args
@@ -70,7 +71,7 @@ class OMXPlayer(object):
 
         self._process = None
         self._connection = None
-        self.load(filename)
+        self.load(filename, pause=pause)
 
     def _load_file(self, filename):
         if self._process:
@@ -141,7 +142,7 @@ class OMXPlayer(object):
 
         return decorator(wrapped, fn)
 
-    def load(self, file_path):
+    def load(self, file_path, pause=True):
         """
         Loads a new file from ``file_path`` by killing the current
         ``omxplayer`` process and forking a new one.
@@ -151,8 +152,9 @@ class OMXPlayer(object):
         """
         self._filename = file_path
         self._load_file(file_path)
-        time.sleep(0.5)  # Wait for the DBus interface to be initialised
-        self.pause()
+        if pause:
+            time.sleep(0.5)  # Wait for the DBus interface to be initialised
+            self.pause()
 
     """ ROOT INTERFACE METHODS """
 
