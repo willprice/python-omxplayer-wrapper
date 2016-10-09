@@ -252,3 +252,19 @@ class OMXPlayerTests(unittest.TestCase):
                                 pause=False)
         
             self.assertEqual(mock_method.call_count, 0)
+
+    def test_load_pauses_by_default(self, popen, sleep, isfile, killpg, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+            self.patch_and_run_omxplayer()
+            self.assertEqual(mock_method.call_count, 1)
+            self.player.load('./test2.mp4')
+            self.assertEqual(mock_method.call_count, 2)
+
+    def test_load_without_pause(self, popen, sleep, isfile, killpg, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+            self.patch_and_run_omxplayer()
+            # the constructor calls load which pauses by default
+            self.assertEqual(mock_method.call_count, 1)
+            self.player.load('./test2.mp4', pause=False)
+            # verify pause hasn't been called again
+            self.assertEqual(mock_method.call_count, 1)
