@@ -234,3 +234,37 @@ class OMXPlayerTests(unittest.TestCase):
             killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
             # verify a new process was started for the second time
             self.assertEqual(popen.call_count, 2)
+
+    
+    def test_init_pauses_by_default(self, popen, sleep, isfile, killpg, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+            self.patch_and_run_omxplayer()
+            self.assertEqual(mock_method.call_count, 1)
+
+    def test_init_without_pause(self, popen, sleep, isfile, killpg, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+            # self.patch_and_run_omxplayer(pause=False)
+            bus_address_finder = Mock()
+            bus_address_finder.get_address.return_val = "example_bus_address"
+            self.player = OMXPlayer(self.TEST_FILE_NAME,
+                                bus_address_finder=bus_address_finder,
+                                Connection=Mock(),
+                                pause=False)
+        
+            self.assertEqual(mock_method.call_count, 0)
+
+    def test_load_pauses_by_default(self, popen, sleep, isfile, killpg, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+            self.patch_and_run_omxplayer()
+            self.assertEqual(mock_method.call_count, 1)
+            self.player.load('./test2.mp4')
+            self.assertEqual(mock_method.call_count, 2)
+
+    def test_load_without_pause(self, popen, sleep, isfile, killpg, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+            self.patch_and_run_omxplayer()
+            # the constructor calls load which pauses by default
+            self.assertEqual(mock_method.call_count, 1)
+            self.player.load('./test2.mp4', pause=False)
+            # verify pause hasn't been called again
+            self.assertEqual(mock_method.call_count, 1)
