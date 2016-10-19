@@ -20,6 +20,7 @@ MOCK_OPEN = mock_open()
 @patch('subprocess.Popen')
 class OMXPlayerTests(unittest.TestCase):
     TEST_FILE_NAME = "./test.mp4"
+    TEST_URL = "rtmp://192.168.0.1/live/mystream"
 
     def test_opens_file_in_omxplayer(self, popen, *args):
         self.patch_and_run_omxplayer()
@@ -115,6 +116,11 @@ class OMXPlayerTests(unittest.TestCase):
         with patch('os.path') as ospath:
             self.patch_and_run_omxplayer()
             ospath.isfile.assert_called_once_with(self.TEST_FILE_NAME)
+
+    def test_not_checks_url_before_launching_player(self, *args):
+        with patch('os.path') as ospath:
+            self.patch_and_run_omxplayer_url()
+            ospath.isfile.assert_not_called()
 
     def test_stop_event(self, *args):
         self.patch_and_run_omxplayer(active=True)
@@ -214,6 +220,15 @@ class OMXPlayerTests(unittest.TestCase):
         if active:
             self.player._process.poll = Mock(return_value=None)
 
+    def patch_and_run_omxplayer_url(self, Connection=Mock(), active=False):
+        bus_address_finder = Mock()
+        bus_address_finder.get_address.return_val = "example_bus_address"
+        self.player = OMXPlayer(self.TEST_URL,
+                                bus_address_finder=bus_address_finder,
+                                Connection=Connection)
+        if active:
+            self.player._process.poll = Mock(return_value=None)
+
     def test_load(self, popen, sleep, isfile, killpg, *args):
         omxplayer_process = Mock()
         popen.return_value = omxplayer_process
@@ -235,7 +250,7 @@ class OMXPlayerTests(unittest.TestCase):
             # verify a new process was started for the second time
             self.assertEqual(popen.call_count, 2)
 
-    
+
     def test_init_pauses_by_default(self, popen, sleep, isfile, killpg, *args):
         with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
             self.patch_and_run_omxplayer()
@@ -250,7 +265,7 @@ class OMXPlayerTests(unittest.TestCase):
                                 bus_address_finder=bus_address_finder,
                                 Connection=Mock(),
                                 pause=False)
-        
+
             self.assertEqual(mock_method.call_count, 0)
 
     def test_load_pauses_by_default(self, popen, sleep, isfile, killpg, *args):
