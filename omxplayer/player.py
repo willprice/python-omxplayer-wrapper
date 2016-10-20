@@ -81,7 +81,7 @@ class OMXPlayer(object):
         self._process = self._setup_omxplayer_process(source)
         self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
-    # For backwards compatibility
+    # For backward compatibility
     def _load_file(self, source):
         self._load_source(source)
 
@@ -516,12 +516,12 @@ class OMXPlayer(object):
         """
         return self._source
 
-    # For backwards compatibility
+    # For backward compatibility
     @_check_player_is_active
     def get_filename(self):
         """
         Returns:
-            str: source currently playing, for backwards compatibility
+            str: source currently playing, for backward compatibility
         """
         return self.get_source()
 
