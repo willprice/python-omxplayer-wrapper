@@ -38,10 +38,12 @@ but import it from other python packages
 from omxplayer import OMXPlayer
 from time import sleep
 
-# This will start an `omxplayer` process, this might 
-# fail the first time you run it, currently in the 
+file_path_or_url = 'path/to/file.mp4'
+
+# This will start an `omxplayer` process, this might
+# fail the first time you run it, currently in the
 # process of fixing this though.
-player = OMXPlayer('path/to/file.mp4')
+player = OMXPlayer(file_path_or_url)
 
 # The player will initially be paused
 
@@ -53,7 +55,26 @@ player.pause()
 player.quit()
 ```
 
-Playing a file from a URL (courtesy of @jappe999)
+Playing a stream from a URL (e.g. a live RTMP or RTSP stream) works the same as with a file path, just change the "source" string parameter given to `OMXPlayer` to a URL instead of a file path.
+```python
+from omxplayer import OMXPlayer
+from time import sleep
+
+file_path_or_url = 'rtmp://192.168.0.1/live/test'
+
+player = OMXPlayer(file_path_or_url)
+
+# The player will initially be paused
+
+player.play()
+sleep(5)
+player.pause()
+
+# Kill the `omxplayer` process gracefully.
+player.quit()
+```
+
+Playing a file from a URL by downloading the network file (courtesy of @jappe999)
 ```python
 import urllib
 from omxplayer import OMXPlayer
