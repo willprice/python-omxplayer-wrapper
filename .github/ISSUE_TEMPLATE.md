@@ -26,10 +26,13 @@ Description:    Raspbian GNU/Linux 8.0 (jessie)
 Release:        8.0
 Codename:       jessie
 ```
-* `python-dbus` Version (`dpkg -s python-dbus`):  `1.2.0`
-* `python` Version (`python --version`): `Python 2.7.9`
-* `omxplayer` Version (`omxplayer --version`): `6c90c75`
 
+| Software | Version |
+|----------|---------|
+| `python-omxplayer-wrapper` | `0.1.0` |
+| `python-dbus` (`dpkg -s python-dbus`) |  `1.2.0` |
+| `python` (`python --version`) | `2.7.9` |
+| `omxplayer` (`omxplayer --version`) | `6c90c75` |
 
 -------
 
