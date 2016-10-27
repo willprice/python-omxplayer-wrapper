@@ -5,6 +5,7 @@ import signal
 import logging
 import threading
 import math
+import urlparse
 
 from decorator import decorator
 from glob import glob
@@ -35,7 +36,7 @@ class OMXPlayer(object):
     This works by speaking to OMXPlayer over DBus sending messages.
 
     Args:
-        filename (str): Path to the file you wish to play
+        source (str): Path to the file (as ~/Videos/my-video.mp4) or URL you wish to play
         args (list): used to pass option parameters to omxplayer.  see: https://github.com/popcornmix/omxplayer#synopsis
 
 
@@ -44,7 +45,7 @@ class OMXPlayer(object):
     >>> OMXPlayer('path.mp4', args=['--no-osd', '--no-keys', '-b'])
 
     """
-    def __init__(self, filename,
+    def __init__(self, source,
                  args=[],
                  bus_address_finder=None,
                  Connection=None,
@@ -54,7 +55,7 @@ class OMXPlayer(object):
         self.args = args
         self.tries = 0
         self._is_playing = True
-        self._filename = filename
+        self._source = source
         self._Connection = Connection if Connection else DBusConnection
         self._bus_address_finder = bus_address_finder if bus_address_finder else BusFinder()
 
@@ -71,16 +72,16 @@ class OMXPlayer(object):
 
         self._process = None
         self._connection = None
-        self.load(filename, pause=pause)
+        self.load(source, pause=pause)
 
-    def _load_file(self, filename):
+    def _load_source(self, source):
         if self._process:
             self.quit()
 
-        self._process = self._setup_omxplayer_process(filename)
+        self._process = self._setup_omxplayer_process(source)
         self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
-    def _run_omxplayer(self, filename, devnull):
+    def _run_omxplayer(self, source, devnull):
         def on_exit():
             logger.info("OMXPlayer process is dead, all DBus calls from here "
                         "will fail")
@@ -89,7 +90,7 @@ class OMXPlayer(object):
             process.wait()
             on_exit()
 
-        command = ['omxplayer'] + self.args + [filename]
+        command = ['omxplayer'] + self.args + [source]
         logger.debug("Opening omxplayer with the command: %s" % command)
         process = subprocess.Popen(command,
                                    stdin=devnull,
@@ -100,12 +101,13 @@ class OMXPlayer(object):
         self._process_monitor.start()
         return process
 
-    def _setup_omxplayer_process(self, filename):
+    def _setup_omxplayer_process(self, source):
             logger.debug('Setting up OMXPlayer process')
-            if not os.path.isfile(filename):
-                raise FileNotFoundError("Could not find: {}".format(filename))
+            source_url = urlparse.urlsplit(source)
+            if not source_url.scheme and not os.path.isfile(source):
+                raise FileNotFoundError("Could not find: {}".format(source))
             with open(os.devnull, 'w') as devnull:
-                process = self._run_omxplayer(filename, devnull)
+                process = self._run_omxplayer(source, devnull)
                 logger.debug('Process opened with PID %s' % process.pid)
                 return process
 
@@ -142,16 +144,16 @@ class OMXPlayer(object):
 
         return decorator(wrapped, fn)
 
-    def load(self, file_path, pause=True):
+    def load(self, source, pause=True):
         """
-        Loads a new file from ``file_path`` by killing the current
-        ``omxplayer`` process and forking a new one.
+        Loads a new source (as a file) from ``source`` (a file path or URL)
+        by killing the current ``omxplayer`` process and forking a new one.
 
         Args:
-            file_path (string): Path to the file to play
+            source (string): Path to the file to play or URL
         """
-        self._filename = file_path
-        self._load_file(file_path)
+        self._source = source
+        self._load_source(source)
         if pause:
             time.sleep(0.5)  # Wait for the DBus interface to be initialised
             self.pause()
@@ -503,12 +505,24 @@ class OMXPlayer(object):
         self._process = None
 
     @_check_player_is_active
+    def get_source(self):
+        """
+        Returns:
+            str: source currently playing
+        """
+        return self._source
+
+    # For backward compatibility
+    @_check_player_is_active
     def get_filename(self):
         """
         Returns:
-            str: filename currently playing
+            str: source currently playing
+
+        .. deprecated:: 0.2.0
+           Use: :func:`get_source` instead.
         """
-        return self._filename
+        return self.get_source()
 
 
 #  MediaPlayer2.Player types:
