@@ -117,7 +117,7 @@ class OMXPlayerTests(unittest.TestCase):
             self.patch_and_run_omxplayer()
             ospath.isfile.assert_called_once_with(self.TEST_FILE_NAME)
 
-    def test_not_checks_url_before_launching_player(self, *args):
+    def test_player_doesnt_check_source_path_exists_for_a_url(self, *args):
         with patch('os.path') as ospath:
             self.patch_and_run_omxplayer_url()
             ospath.isfile.assert_not_called()
