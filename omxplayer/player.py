@@ -81,10 +81,6 @@ class OMXPlayer(object):
         self._process = self._setup_omxplayer_process(source)
         self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
-    # For backward compatibility
-    def _load_file(self, source):
-        self._load_source(source)
-
     def _run_omxplayer(self, source, devnull):
         def on_exit():
             logger.info("OMXPlayer process is dead, all DBus calls from here "
@@ -521,7 +517,10 @@ class OMXPlayer(object):
     def get_filename(self):
         """
         Returns:
-            str: source currently playing, for backward compatibility
+            str: source currently playing
+
+        .. deprecated:: 0.2.0
+           Use: :func:`get_source` instead.
         """
         return self.get_source()
 
