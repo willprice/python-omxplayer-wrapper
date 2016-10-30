@@ -8,7 +8,6 @@ Status](https://readthedocs.org/projects/python-omxplayer-wrapper/badge/?version
 [![Code Coverage](https://codecov.io/gh/willprice/python-omxplayer-wrapper/branch/develop/graph/badge.svg)](https://codecov.io/gh/willprice/python-omxplayer-wrapper)
 
 
-
 > Control OMXPlayer from Python on the Raspberry Pi.
 
 ## Install
@@ -73,6 +72,12 @@ player.pause()
 # Kill the `omxplayer` process gracefully.
 player.quit()
 ```
+
+## Usage patterns
+*Choppy streaming over a slow connection?* If you're connection isn't good
+enough to support streaming, checkout `urllib2` to download the file locally
+prior to playing.
+
 
 ## Docs
 You can read the docs here:
