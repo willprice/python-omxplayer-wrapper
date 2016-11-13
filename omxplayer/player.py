@@ -49,7 +49,7 @@ class OMXPlayer(object):
                  args=[],
                  bus_address_finder=None,
                  Connection=None,
-                 pause=True):
+                 pause=False):
         logger.debug('Instantiating OMXPlayer')
 
         self.args = args
@@ -144,7 +144,7 @@ class OMXPlayer(object):
 
         return decorator(wrapped, fn)
 
-    def load(self, source, pause=True):
+    def load(self, source, pause=False):
         """
         Loads a new source (as a file) from ``source`` (a file path or URL)
         by killing the current ``omxplayer`` process and forking a new one.
