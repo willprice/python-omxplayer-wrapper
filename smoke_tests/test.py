@@ -5,7 +5,7 @@ from smoke_tests import TEST_MEDIA_FILE_1
 
 
 print(TEST_MEDIA_FILE_1)
-vid1 = OMXPlayer(TEST_MEDIA_FILE_1)
+vid1 = OMXPlayer(TEST_MEDIA_FILE_1, pause=True)
 print("Start playing")
 vid1.set_position(5)
 vid1.play()
