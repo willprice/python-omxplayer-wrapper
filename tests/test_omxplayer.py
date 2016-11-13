@@ -251,12 +251,12 @@ class OMXPlayerTests(unittest.TestCase):
             self.assertEqual(popen.call_count, 2)
 
 
-    def test_init_pauses_by_default(self, popen, sleep, isfile, killpg, *args):
+    def test_init_without_pause(self, popen, sleep, isfile, killpg, *args):
         with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
             self.patch_and_run_omxplayer()
-            self.assertEqual(mock_method.call_count, 1)
+            self.assertEqual(mock_method.call_count, 0)
 
-    def test_init_without_pause(self, popen, sleep, isfile, killpg, *args):
+    def test_init_pause(self, popen, sleep, isfile, killpg, *args):
         with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
             # self.patch_and_run_omxplayer(pause=False)
             bus_address_finder = Mock()
@@ -264,22 +264,18 @@ class OMXPlayerTests(unittest.TestCase):
             self.player = OMXPlayer(self.TEST_FILE_NAME,
                                 bus_address_finder=bus_address_finder,
                                 Connection=Mock(),
-                                pause=False)
+                                pause=True)
 
-            self.assertEqual(mock_method.call_count, 0)
+            self.assertEqual(mock_method.call_count, 1)
 
-    def test_load_pauses_by_default(self, popen, sleep, isfile, killpg, *args):
+    def test_load_and_pause(self, popen, sleep, isfile, killpg, *args):
         with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
             self.patch_and_run_omxplayer()
+            self.player.load('./test2.mp4', pause=True)
             self.assertEqual(mock_method.call_count, 1)
-            self.player.load('./test2.mp4')
-            self.assertEqual(mock_method.call_count, 2)
 
     def test_load_without_pause(self, popen, sleep, isfile, killpg, *args):
         with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
             self.patch_and_run_omxplayer()
-            # the constructor calls load which pauses by default
-            self.assertEqual(mock_method.call_count, 1)
-            self.player.load('./test2.mp4', pause=False)
-            # verify pause hasn't been called again
-            self.assertEqual(mock_method.call_count, 1)
+            self.player.load('./test2.mp4')
+            self.assertEqual(mock_method.call_count, 0)
