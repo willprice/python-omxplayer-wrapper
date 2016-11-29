@@ -6,6 +6,7 @@ import logging
 import threading
 import math
 import urlparse
+import stat
 
 from decorator import decorator
 from glob import glob
@@ -104,7 +105,7 @@ class OMXPlayer(object):
     def _setup_omxplayer_process(self, source):
             logger.debug('Setting up OMXPlayer process')
             source_url = urlparse.urlsplit(source)
-            if not source_url.scheme and not os.path.isfile(source):
+            if not source_url.scheme and not os.path.isfile(source) and not stat.S_ISFIFO(os.stat(source).st_mode):
                 raise FileNotFoundError("Could not find: {}".format(source))
             with open(os.devnull, 'w') as devnull:
                 process = self._run_omxplayer(source, devnull)
