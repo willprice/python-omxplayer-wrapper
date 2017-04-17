@@ -1,19 +1,26 @@
 import unittest
 import os
+import sys
 import signal
 import dbus
 
-from nose_parameterized import parameterized
+from parameterized import parameterized
 from mock import patch, Mock, call, mock_open
 
 from omxplayer.dbus_connection import DBusConnectionError
 from omxplayer.player import OMXPlayer
 
+if sys.version_info[0] == 2:
+    builtin = '__builtin__'
+else:
+    builtin = 'builtins'
+
+
 
 MOCK_OPEN = mock_open()
 
 
-@patch('__builtin__.open', MOCK_OPEN)
+@patch('{}.open'.format(builtin), MOCK_OPEN)
 @patch('os.killpg')
 @patch('os.path.isfile')
 @patch('time.sleep')
@@ -56,7 +63,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['stop', 'Stop', [], []],
         ['seek', 'Seek', [100], [100]],
         ['set_position', 'SetPosition', [1], [dbus.ObjectPath("/not/used"),
-                                              dbus.Int64(1000000L)]],
+                                              dbus.Int64(1000000)]],
         ['list_subtitles', 'ListSubtitles', [], []],
         ['action', 'Action', ['p'], ['p']]
     ])
@@ -204,7 +211,7 @@ class OMXPlayerTests(unittest.TestCase):
             self.run_command(command_name, *command_args)
             # generates a call of the form `call().CanQuit`
             expected_call = getattr(call(), interface_command_name)(*expected_args)
-            interface.assert_has_calls(expected_call)
+            interface.assert_has_calls([expected_call])
 
     def run_command(self, command_name, *args):
         command = getattr(self.player, command_name)
