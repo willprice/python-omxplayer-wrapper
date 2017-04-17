@@ -17,3 +17,4 @@ Sphinx==1.5.5
 sphinx-rtd-theme==0.2.4
 sphinxcontrib-napoleon==0.6.1
 evento==1.0.1
+tox==2.5.0
