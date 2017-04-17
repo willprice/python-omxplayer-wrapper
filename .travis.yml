@@ -1,8 +1,11 @@
+dist: trusty
 sudo: false
 language: python
 python:
     - 2.7_with_system_site_packages
-    - 3.6_with_system_site_packages
+      # Ideally I'd like to test with 3.6 but since 3.4 is the latest in
+      # trusty we have to use that instead
+    - 3.4_with_system_site_packages
 
 cache:
     - pip
