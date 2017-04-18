@@ -8,7 +8,7 @@ setup(
     author_email='will.price94+dev@gmail.com',
     url='https://github.com/willprice/python-omxplayer-wrapper',
 
-    version='0.2.0',
+    version='0.2.1',
 
     description='Control OMXPlayer on the Raspberry Pi',
     long_description='Control OMXPlayer on the Raspberry Pi through DBus',
@@ -21,6 +21,10 @@ setup(
         'Topic :: Multimedia :: Video',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 
     keywords='omxplayer pi raspberry raspberrypi raspberry_pi library video media',
@@ -36,7 +40,7 @@ setup(
         'test': [
             'mock',
             'nose',
-            'nose-parameterized',
+            'parameterized',
         ],
         'docs': [
             'Sphinx',

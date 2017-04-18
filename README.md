@@ -1,6 +1,7 @@
 # Python OMXPlayer wrapper
 
 [![PyPI Version](https://img.shields.io/pypi/v/omxplayer-wrapper.svg?maxAge=2592000)](https://pypi.python.org/pypi/omxplayer-wrapper)
+[![PyPI Python versions](https://img.shields.io/pypi/pyversions/omxplayer-wrapper.svg)](https://pypi.python.org/pypi/omxplayer-wrapper)
 [![PyPI License](https://img.shields.io/pypi/l/omxplayer-wrapper.svg?maxAge=2592000)](https://pypi.python.org/pypi/omxplayer-wrapper)
 [![Documentation
 Status](https://readthedocs.org/projects/python-omxplayer-wrapper/badge/?version=latest)](https://readthedocs.org/projects/python-omxplayer-wrapper/?badge=latest)
