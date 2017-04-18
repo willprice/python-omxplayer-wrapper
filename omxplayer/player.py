@@ -5,10 +5,16 @@ import signal
 import logging
 import threading
 import math
-import urlparse
+import sys
+try: # python2
+    from urlparse import urlsplit
+except ImportError: # python3
+    from urllib.parse import urlsplit
+
+if sys.version_info > (3,):
+    long = int
 
 from decorator import decorator
-from glob import glob
 from dbus import DBusException, Int64, String, ObjectPath
 
 from omxplayer.bus_finder import BusFinder
@@ -103,7 +109,7 @@ class OMXPlayer(object):
 
     def _setup_omxplayer_process(self, source):
             logger.debug('Setting up OMXPlayer process')
-            source_url = urlparse.urlsplit(source)
+            source_url = urlsplit(source)
             if not source_url.scheme and not os.path.isfile(source):
                 raise FileNotFoundError("Could not find: {}".format(source))
             with open(os.devnull, 'w') as devnull:

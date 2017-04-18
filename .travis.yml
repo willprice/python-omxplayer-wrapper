@@ -1,20 +1,28 @@
+dist: trusty
+sudo: false
 language: python
 python:
     - 2.7_with_system_site_packages
+      # Ideally I'd like to test with 3.6 but since 3.4 is the latest in
+      # trusty we have to use that instead
+    - 3.4_with_system_site_packages
+
 cache:
     - pip
     - apt
+
 addons:
   apt:
     packages:
       - python-dbus
       - python3-dbus
 
-env:
-  global:
 install:
   - pip install -r requirements.txt
+  - pip install tox-travis
+
 script:
   - make check
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)

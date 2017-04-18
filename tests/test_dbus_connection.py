@@ -1,6 +1,6 @@
 import unittest
 
-from nose_parameterized import parameterized
+from parameterized import parameterized
 from mock import patch, Mock
 from dbus import DBusException
 
