@@ -55,12 +55,14 @@ class OMXPlayer(object):
                  args=[],
                  bus_address_finder=None,
                  Connection=None,
+                 dbus_name=None,
                  pause=False):
         logger.debug('Instantiating OMXPlayer')
 
         self.args = args
         self._is_playing = True
         self._source = source
+        self._dbus_name = dbus_name
         self._Connection = Connection if Connection else DBusConnection
         self._bus_address_finder = bus_address_finder if bus_address_finder else BusFinder()
 
@@ -96,6 +98,8 @@ class OMXPlayer(object):
             on_exit()
 
         command = ['omxplayer'] + self.args + [source]
+        if self._dbus_name:
+            command += ['--dbus_name', self._dbus_name]
         logger.debug("Opening omxplayer with the command: %s" % command)
         process = subprocess.Popen(command,
                                    stdin=devnull,
@@ -122,7 +126,7 @@ class OMXPlayer(object):
         while tries < 50:
             logger.debug('DBus connect attempt: {}'.format(tries))
             try:
-                connection = Connection(bus_address_finder.get_address())
+                connection = Connection(bus_address_finder.get_address(), self._dbus_name)
                 logger.debug(
                     'Connected to OMXPlayer at DBus address: %s' % connection)
                 return connection

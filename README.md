@@ -45,11 +45,9 @@ file_path_or_url = 'path/to/file.mp4'
 # process of fixing this though.
 player = OMXPlayer(file_path_or_url)
 
-# The player will initially be paused
-
-player.play()
-sleep(5)
 player.pause()
+sleep(5)
+player.play()
 
 # Kill the `omxplayer` process gracefully.
 player.quit()
@@ -64,14 +62,31 @@ file_path_or_url = 'rtmp://192.168.0.1/live/test'
 
 player = OMXPlayer(file_path_or_url)
 
-# The player will initially be paused
-
-player.play()
-sleep(5)
 player.pause()
+sleep(5)
+player.play()
 
 # Kill the `omxplayer` process gracefully.
 player.quit()
+```
+
+Playing several instances of omxplayer simultaneously
+```python
+from omxplayer import OMXPlayer
+
+# Use default dbus name for first instance
+player1 = OMXPlayer(file_path_or_url1, pause=True)
+# Name of dbus for second instance is just an example
+player2 = OMXPlayer(file_path_or_url2, dbus_name='org.mpris.MediaPlayer2.omxplayer1', pause=True)
+
+# Players are initially paused due to the 'pause' argument, but this is not necessary
+# That way we can start them synchronously
+player1.play()
+player2.play()
+
+# Kill the `omxplayer` processes gracefully.
+player1.quit()
+player2.quit()
 ```
 
 ## Usage patterns

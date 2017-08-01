@@ -16,10 +16,11 @@ class DBusConnection(object):
         player_interface: org.mpris.MediaPlayer2.Player interface  proxy object
     """
 
-    def __init__(self, bus_address):
+    def __init__(self, bus_address, dbus_name=None):
         self.root_interface = None
         self.player_interface = None
         self._address = bus_address
+        self._dbus_name = dbus_name
         self._bus = self._create_connection()
         self.proxy = self._create_proxy()
 
@@ -29,7 +30,10 @@ class DBusConnection(object):
     def _create_proxy(self):
         try:
             # introspection fails so it is disabled
-            proxy = self._bus.get_object('org.mpris.MediaPlayer2.omxplayer',
+            dbus_name = 'org.mpris.MediaPlayer2.omxplayer'
+            if self._dbus_name:
+                dbus_name = self._dbus_name
+            proxy = self._bus.get_object(dbus_name,
                                          '/org/mpris/MediaPlayer2',
                                          introspect=False)
             self._create_media_interfaces_on_proxy(proxy)
