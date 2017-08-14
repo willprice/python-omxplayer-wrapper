@@ -15,7 +15,7 @@ if sys.version_info > (3,):
     long = int
 
 from decorator import decorator
-from dbus import DBusException, Int64, String, ObjectPath
+from dbus import DBusException, Int32, Int64, String, ObjectPath
 
 from omxplayer.bus_finder import BusFinder
 from omxplayer.dbus_connection import DBusConnection, \
@@ -394,6 +394,30 @@ class OMXPlayer(object):
         self._get_player_interface().SetAspectMode(ObjectPath('/not/used'), String(mode))
 
     @_check_player_is_active
+    def get_aspect(self):
+        """
+        Returns:
+             float: The aspect ratio
+        """
+        return float(self._get_properties_interface().Aspect())
+
+    @_check_player_is_active
+    def get_res_width(self):
+        """
+        Returns:
+            [int]: Video width in px
+        """
+        return int(self._get_properties_interface().ResWidth())
+
+    @_check_player_is_active
+    def get_res_height(self):
+        """
+        Returns:
+            [int]: Video height in px
+        """
+        return int(self._get_properties_interface().ResHeight())
+
+    @_check_player_is_active
     def set_video_pos(self, x1, y1, x2, y2):
         """
         Args:
@@ -430,6 +454,16 @@ class OMXPlayer(object):
         return map(str, self._get_player_interface().ListAudio())
 
     @_check_player_is_active
+    def select_audio(self, index):
+        """
+        Args:
+            index (int): the index of the audio stream to select
+        Returns:
+            [bool]: True if stream was selected, False otherwise
+        """
+        return bool(self._get_player_interface().SelectAudio(Int32(index)))
+
+    @_check_player_is_active
     def list_subtitles(self):
         """
         Returns:
@@ -437,6 +471,26 @@ class OMXPlayer(object):
             format: ``<index>:<language>:<name>:<codec>:<active>``
         """
         return map(str, self._get_player_interface().ListSubtitles())
+
+    @_check_player_is_active
+    def select_subtitle(self, index):
+        """
+        Args:
+            index (int): the index of the subtitle to select
+        Returns:
+            [bool]: True if subtitle was selected, False otherwise
+        """
+        return bool(self._get_player_interface().SelectSubtitle(Int32(index)))
+
+    @_check_player_is_active
+    def show_subtitles(self):
+        """ Turns on subtitles """
+        self._get_player_interface().ShowSubtitles()
+
+    @_check_player_is_active
+    def hide_subtitles(self):
+        """ Turns off subtitles """
+        self._get_player_interface().HideSubtitles()
 
     @_check_player_is_active
     def action(self, code):
