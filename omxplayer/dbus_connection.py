@@ -16,37 +16,45 @@ class DBusConnection(object):
         player_interface: org.mpris.MediaPlayer2.Player interface  proxy object
     """
 
-    def __init__(self, bus_address, dbus_name=None):
-        self.root_interface = None
-        self.player_interface = None
-        self._address = bus_address
-        self._dbus_name = dbus_name
-        self._bus = self._create_connection()
+    def __init__(self, bus_address, dbus_name):
+        if dbus_name:
+            self._dbus_name = dbus_name
+        else:
+            self._dbus_name = 'org.mpris.MediaPlayer2.omxplayer'
+        self._bus = dbus.bus.BusConnection(bus_address)
         self.proxy = self._create_proxy()
 
-    def _create_connection(self):
-        return dbus.bus.BusConnection(self._address)
+        self.root_interface = dbus.Interface(self.proxy, 'org.mpris.MediaPlayer2')
+        self.player_interface = dbus.Interface(self.proxy, 'org.mpris.MediaPlayer2.Player')
+        self.properties_interface = dbus.Interface(self.proxy, 'org.freedesktop.DBus.Properties')
 
     def _create_proxy(self):
         try:
             # introspection fails so it is disabled
-            dbus_name = 'org.mpris.MediaPlayer2.omxplayer'
-            if self._dbus_name:
-                dbus_name = self._dbus_name
-            proxy = self._bus.get_object(dbus_name,
+            proxy = self._bus.get_object(self._dbus_name,
                                          '/org/mpris/MediaPlayer2',
                                          introspect=False)
-            self._create_media_interfaces_on_proxy(proxy)
             return proxy
         except dbus.DBusException:
             raise DBusConnectionError('Could not get proxy object')
 
-    def _create_media_interfaces_on_proxy(self, proxy):
-        self.root_interface = self._interface(proxy, 'org.mpris.MediaPlayer2')
-        self.player_interface = self._interface(proxy,
-                                                'org.mpris.MediaPlayer2.Player')
-        self.properties_interface = self._interface(proxy,
-                                                    'org.freedesktop.DBus.Properties')
 
-    def _interface(self, proxy, interface):
-        return dbus.Interface(proxy, interface)
+
+# The python dbus bindings don't provide property access via the
+# 'org.freedesktop.DBus.Properties' interface so we wrap the access of
+# properties using
+class DbusObject(object):
+    def __init__(self, object_proxy, property_manager, interface_name, methods, properties):
+        self._proxy = object_proxy
+        self._property_manager = property_manager
+        self._interface_name = interface_name
+        self._methods = methods
+        self._properties = properties
+
+    def __getattr__(self, name):
+        if name in self._methods:
+            return self._proxy.__getattr__(name)
+        elif name in self._properties:
+            return self._property_manager.Get(self._interface_name, name)
+        else:
+            raise AttributeError("'{}' attribute not specified on this DBus object".format(name))
