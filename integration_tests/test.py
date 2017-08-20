@@ -8,6 +8,11 @@ import unittest
 
 from omxplayer import OMXPlayer
 
+# Decimal places for numerical comparison
+_TIME_DP=0
+_RATE_DP=2
+_VOLUME_DP=3
+
 
 class OMXPlayerTest(unittest.TestCase):
     MEDIA_FILE_PATH = './media/test_media_1.mp4'
@@ -71,13 +76,13 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
         self.assertTrue(self.player.position() < 1.0)
 
     def test_minimum_rate(self):
-        self.assertEqual(0, self.player.minimum_rate())
+        self.assertAlmostEqual(0.001, self.player.minimum_rate(), _RATE_DP)
 
     def test_maximum_rate(self):
-        self.assertEqual(10.125, self.player.maximum_rate())
+        self.assertAlmostEqual(4.0, self.player.maximum_rate(), _RATE_DP)
 
     def test_rate(self):
-        self.assertEqual(4.0, self.player.rate())
+        self.assertAlmostEqual(4.0, self.player.rate(), _RATE_DP)
 
     def test_metadata(self):
         expectedMetadata = {
@@ -99,7 +104,7 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
         self.assertEqual(720, self.player.height())
 
     def test_duration(self):
-        self.assertEqual(19.691, self.player.duration(), 0.00001)
+        self.assertAlmostEqual(19.691, self.player.duration(), _TIME_DP)
 
 
 class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
@@ -126,20 +131,20 @@ class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
 
     def test_seek(self):
         initial_position = self.player.position()
-        self.player.seek(1000)
-        self.assertEqual(initial_position + 1000, self.player.position() / 1000, 10)
+        self.player.seek(10)
+        self.assertAlmostEqual(initial_position + 10, self.player.position(), _TIME_DP)
 
     def test_set_position(self):
-        self.player.set_position(1000)
-        self.assertEqual(1000 , self.player.position() / 1000, 10)
+        self.player.set_position(10)
+        self.assertAlmostEqual(10, self.player.position(), _TIME_DP)
 
     def test_mute(self):
         self.player.set_volume(1)
         self.player.mute()
-        self.assertEqual(0, self.player.volume())
+        self.assertAlmostEqual(0, self.player.volume(), _VOLUME_DP)
 
     def test_unmute(self):
         self.player.set_volume(1)
         self.player.mute()
         self.player.unmute()
-        self.assertEqual(1, self.player.volume())
+        self.assertAlmostEqual(1, self.player.volume(), _VOLUME_DP)
