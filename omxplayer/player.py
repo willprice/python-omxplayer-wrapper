@@ -327,12 +327,19 @@ class OMXPlayer(object):
 
     @_check_player_is_active
     @_from_dbus_type
-    def position(self):
+    def _position_us(self):
         """
         Returns:
             int: position in microseconds
         """
         return self._player_interface_property('Position')
+
+    def position(self):
+        """
+        Returns:
+            int: position in seconds
+        """
+        return self._position_us() / (1000 * 1000.0)
 
     @_check_player_is_active
     @_from_dbus_type
@@ -383,6 +390,7 @@ class OMXPlayer(object):
         """
         return self._player_interface_property('Metadata')
 
+    """ PLAYER INTERFACE NON-STANDARD PROPERTIES """
 
     @_check_player_is_active
     @_from_dbus_type
@@ -422,54 +430,12 @@ class OMXPlayer(object):
 
     @_check_player_is_active
     @_from_dbus_type
-    def duration(self):
+    def _duration_us(self):
         """
         Returns
             int: total length in microseconds
         """
         return self._player_interface_property('Duration')
-
-    """ PLAYER INTERFACE METHODS """
-
-    @_check_player_is_active
-    def mute(self):
-        """
-        Turns mute on, if the audio is already muted, then this does not do
-        anything
-
-        Returns:
-            None:
-        """
-        self._properties_interface.Mute()
-
-    @_check_player_is_active
-    def unmute(self):
-        """
-        Unmutes the video, if the audio is already unmuted, then this does
-        not do anything
-
-        Returns:
-            None:
-        """
-        self._properties_interface.Unmute()
-
-    @_check_player_is_active
-    @_from_dbus_type
-    def position(self):
-        """
-        Returns:
-            float: The position in seconds
-        """
-        return self._properties_interface.Position() / (1000 * 1000.0)
-
-    @_check_player_is_active
-    @_from_dbus_type
-    def _duration_us(self):
-        """
-        Returns:
-            long: The duration in microseconds
-        """
-        return self._properties_interface.Duration()
 
     @_check_player_is_active
     def duration(self):
@@ -479,25 +445,10 @@ class OMXPlayer(object):
         """
         return self._duration_us() / (1000 * 1000.0)
 
-    @_check_player_is_active
-    @_from_dbus_type
-    def minimum_rate(self):
-        """
-        Returns:
-            str: The minimum playback rate
-        """
-        return self._properties_interface.MinimumRate()
 
-    @_check_player_is_active
-    @_from_dbus_type
-    def maximum_rate(self):
-        """
-        Returns:
-            str: The maximum playback rate
-        """
-        return self._properties_interface.MaximumRate()
 
     """ PLAYER INTERFACE METHODS """
+
     @_check_player_is_active
     def pause(self):
         """
@@ -532,9 +483,9 @@ class OMXPlayer(object):
     def seek(self, relative_position):
         """
         Args:
-            relative_position (float): The position in microseconds to seek to.
+            relative_position (float): The position in seconds to seek to.
         """
-        self._player_interface.Seek(Int64(relative_position))
+        self._player_interface.Seek(Int64(1000.0 * 1000 * relative_position))
         self.seekEvent(self, relative_position)
 
     @_check_player_is_active
@@ -544,7 +495,7 @@ class OMXPlayer(object):
         Args:
             position (float): The position in seconds.
         """
-        self._player_interface.SetPosition(ObjectPath("/not/used"), Int64(position*1000*1000))
+        self._player_interface.SetPosition(ObjectPath("/not/used"), Int64(position * 1000.0 * 1000))
         self.positionEvent(self, position)
 
     @_check_player_is_active
@@ -555,6 +506,29 @@ class OMXPlayer(object):
             alpha (float): The transparency (0..255)
         """
         self._player_interface.SetAlpha(ObjectPath('/not/used'), Int64(alpha))
+
+    @_check_player_is_active
+    def mute(self):
+        """
+        Turns mute on, if the audio is already muted, then this does not do
+        anything
+
+        Returns:
+            None:
+        """
+        self._player_interface.Mute()
+
+    @_check_player_is_active
+    def unmute(self):
+        """
+        Unmutes the video, if the audio is already unmuted, then this does
+        not do anything
+
+        Returns:
+            None:
+        """
+        self._player_interface.Unmute()
+
 
     @_check_player_is_active
     @_from_dbus_type
@@ -576,6 +550,14 @@ class OMXPlayer(object):
         self._player_interface.VideoPos(ObjectPath('/not/used'), String(position))
 
     @_check_player_is_active
+    def video_pos(self):
+        """
+        Returns:
+        """
+        position_string = self._player_interface.VideoPos(ObjectPath('/not/used'), String(position))
+        return list(map(int, position_string.split(" ")))
+
+    @_check_player_is_active
     @_from_dbus_type
     def set_video_crop(self, x1, y1, x2, y2):
         """
@@ -586,14 +568,18 @@ class OMXPlayer(object):
         self._player_interface.SetVideoCropPos(ObjectPath('/not/used'), String(crop))
 
     @_check_player_is_active
-    @_from_dbus_type
-    def list_video(self):
+    def hide_video(self):
         """
-        Returns:
-            [str]: A list of all known video streams, each item is in the
-            format: ``<index>:<language>:<name>:<codec>:<active>``
+        TODO
         """
-        return self._player_interface.ListVideo()
+        self._player_interface.HideVideo()
+
+    @_check_player_is_active
+    def show_video(self):
+        """
+        TODO
+        """
+        self._player_interface.UnHideVideo()
 
     @_check_player_is_active
     @_from_dbus_type
@@ -607,6 +593,17 @@ class OMXPlayer(object):
 
     @_check_player_is_active
     @_from_dbus_type
+    def list_video(self):
+        """
+        Returns:
+            [str]: A list of all known video streams, each item is in the
+            format: ``<index>:<language>:<name>:<codec>:<active>``
+        """
+        return self._player_interface.ListVideo()
+
+
+    @_check_player_is_active
+    @_from_dbus_type
     def list_subtitles(self):
         """
         Returns:
@@ -614,6 +611,34 @@ class OMXPlayer(object):
             format: ``<index>:<language>:<name>:<codec>:<active>``
         """
         return self._player_interface.ListSubtitles()
+
+    @_check_player_is_active
+    def select_subtitle(self, index):
+        """
+        TODO
+        """
+        return self._player_interface.SelectSubtitle(dbus.Int32(index))
+
+    @_check_player_is_active
+    def select_audio(self, index):
+        """
+        TODO
+        """
+        return self._player_interface.SelectAudio(dbus.Int32(index))
+
+    @_check_player_is_active
+    def show_subtitles(self):
+        """
+        TODO
+        """
+        return self._player_interface.ShowSubtitles()
+
+    @_check_player_is_active
+    def hide_subtitles(self):
+        """
+        TODO
+        """
+        return self._player_interface.HideSubtitles()
 
     @_check_player_is_active
     @_from_dbus_type
