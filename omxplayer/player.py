@@ -323,7 +323,7 @@ class OMXPlayer(object):
         Args:
             float: Volume in millibels
         """
-        return self._player_interface_property('Volume', 10**(volume/2000.0))
+        return self._player_interface_property('Volume', dbus.Double(10**(volume/2000.0)))
 
     @_check_player_is_active
     @_from_dbus_type
@@ -379,7 +379,7 @@ class OMXPlayer(object):
         Returns:
             None:
         """
-        return self._player_interface_property('MaximumRate', rate)
+        return self._player_interface_property('Rate', dbus.Double(rate))
 
     @_check_player_is_active
     @_from_dbus_type
@@ -697,6 +697,22 @@ class OMXPlayer(object):
             self._is_playing = True
             self.playEvent(self)
 
+    @_check_player_is_active
+    @_from_dbus_type
+    def next(self):
+        """
+        TODO
+        """
+        return self._player_interface.Next()
+
+    @_check_player_is_active
+    @_from_dbus_type
+    def previous(self):
+        """
+        TODO
+        """
+        return self._player_interface.Previous()
+
     @property
     def _root_interface(self):
         return self._connection.root_interface
@@ -709,17 +725,17 @@ class OMXPlayer(object):
     def _properties_interface(self):
         return self._connection.properties_interface
 
-    def _get_interface_property(self, interface, prop, *args):
-        if (len(args) == 0):
-            return self._properties_interface.Get(interface, prop)
+    def _interface_property(self, interface, prop, val):
+        if val:
+            return self._properties_interface.Set(interface, prop, val)
         else:
-            return self._properties_interface.Set(interface, prop, *args)
+            return self._properties_interface.Get(interface, prop)
 
-    def _root_interface_property(self, prop, *args):
-        return self._get_interface_property(self._root_interface.dbus_interface, prop, *args)
+    def _root_interface_property(self, prop, val=None):
+        return self._interface_property(self._root_interface.dbus_interface, prop, val)
 
-    def _player_interface_property(self, prop, *args):
-        return self._get_interface_property(self._player_interface.dbus_interface, prop, *args)
+    def _player_interface_property(self, prop, val=None):
+        return self._interface_property(self._player_interface.dbus_interface, prop, val)
 
     def quit(self):
         try:

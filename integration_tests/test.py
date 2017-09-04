@@ -6,6 +6,7 @@ import dbus
 
 import unittest
 
+import omxplayer.keys
 from omxplayer import OMXPlayer
 
 # Decimal places for numerical comparison
@@ -19,6 +20,7 @@ class OMXPlayerTest(unittest.TestCase):
 
     def setUp(self):
         self.player = OMXPlayer(self.MEDIA_FILE_PATH)
+        sleep(1) # Give the player time to start up
 
     def tearDown(self):
         self.player.quit()
@@ -67,10 +69,16 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
         self.assertTrue(self.player.can_pause())
 
     def test_playback_status(self):
+        self.player.pause()
         self.assertEqual("Paused", self.player.playback_status())
 
     def test_volume(self):
-        self.assertEqual(0.0, self.player.volume())
+        self.assertEqual(0.0, self.player.volume(), _VOLUME_DP)
+
+    def test_set_volume(self):
+        self.assertAlmostEqual(0.0, self.player.volume(), _VOLUME_DP)
+        self.player.set_volume(1)
+        self.assertAlmostEqual(1.0, self.player.volume(), _VOLUME_DP)
 
     def test_position(self):
         self.assertTrue(self.player.position() < 1.0)
@@ -84,6 +92,11 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
     def test_rate(self):
         self.assertAlmostEqual(4.0, self.player.rate(), _RATE_DP)
 
+    def test_set_rate(self):
+        self.assertAlmostEqual(4.0, self.player.rate(), _RATE_DP)
+        self.player.set_rate(1)
+        self.assertAlmostEqual(1, self.player.rate(), _RATE_DP)
+
     def test_metadata(self):
         expectedMetadata = {
             'mpris:length': 19691000,
@@ -91,6 +104,8 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
         }
         self.assertEqual(expectedMetadata, self.player.metadata())
 
+
+class OMXPlayerPlayerNonStandardPropertiesTest(OMXPlayerTest):
     def test_aspect(self):
         self.assertEqual(0, self.player.aspect_ratio())
 
@@ -108,6 +123,15 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
 
 
 class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
+    def test_get_source(self):
+        self.assertEqual(self.MEDIA_FILE_PATH, self.player.get_source())
+
+    def test_next(self):
+        self.player.next()
+
+    def test_previous(self):
+        self.player.previous()
+
     def test_playing_on_start(self):
         sleep(1) # it takes a while for omxplayer to load and start playing
                  # before starting video playback on startup it will be in the
@@ -138,6 +162,12 @@ class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
         self.player.set_position(10)
         self.assertAlmostEqual(10, self.player.position(), _TIME_DP)
 
+    def test_set_alpha(self):
+        self.player.set_alpha(255)
+
+    def test_set_aspect_mode(self):
+        self.player.set_aspect_mode("stretch")
+
     def test_mute(self):
         self.player.set_volume(1)
         self.player.mute()
@@ -148,3 +178,39 @@ class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
         self.player.mute()
         self.player.unmute()
         self.assertAlmostEqual(1, self.player.volume(), _VOLUME_DP)
+
+    def test_list_subtitles(self):
+        self.assertEqual([], self.player.list_subtitles())
+
+    def test_set_video_crop(self):
+        self.player.set_video_crop(0, 0, 100, 100)
+
+    def test_hide_video(self):
+        self.player.hide_video()
+
+    def test_show_video(self):
+        self.player.show_video()
+
+    def test_list_audio(self):
+        self.assertEqual(1, len(self.player.list_audio()))
+
+    def test_list_video(self):
+        self.assertEqual(1, len(self.player.list_video()))
+
+    def test_select_subtitle(self):
+        self.player.select_subtitle(0)
+
+    def test_select_audio(self):
+        self.player.select_audio(0)
+
+    def test_show_subtitles(self):
+        self.player.show_subtitles()
+
+    def test_hide_subtitles(self):
+        self.player.hide_subtitles()
+
+    def test_action(self):
+        self.player.action(omxplayer.keys.SHOW_INFO)
+
+class OMXPlayerPlayerInterfaceNonStandardMethodsTest(OMXPlayerTest):
+    pass

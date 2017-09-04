@@ -16,7 +16,7 @@ class DBusConnection(object):
         player_interface: org.mpris.MediaPlayer2.Player interface  proxy object
     """
 
-    def __init__(self, bus_address, dbus_name):
+    def __init__(self, bus_address, dbus_name=None):
         if dbus_name:
             self._dbus_name = dbus_name
         else:
