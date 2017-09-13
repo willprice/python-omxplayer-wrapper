@@ -52,10 +52,17 @@ class OMXPlayerTests(unittest.TestCase):
         ['identity', 'Identity', [], []]
     ])
     def test_root_interface_properties(self, popen, sleep, isfile, killpg, command_name,
-                                     interface_command_name, command_args, expected_dbus_call_args):
+                                       property_name, command_args, expected_dbus_call_args):
         self.patch_and_run_omxplayer()
         self.player._root_interface.dbus_interface = "org.mpris.MediaPlayer2"
-        self.patch_interface_and_run_command('_properties_interface', command_name, command_args)
+        interface = self.player._properties_interface
+        interface.reset_mock()
+
+        self.patch_interface_and_run_command(command_name, command_args)
+
+        expected_call = call.Get("org.mpris.MediaPlayer2", property_name, *expected_dbus_call_args)
+        interface.assert_has_calls([expected_call])
+
 
     @parameterized.expand([
         ['pause', 'Pause', [], []],
@@ -63,37 +70,47 @@ class OMXPlayerTests(unittest.TestCase):
         ['seek', 'Seek', [100], [dbus.Int64(100 * 1e6)]],
         ['set_position', 'SetPosition', [1], [dbus.ObjectPath("/not/used"), dbus.Int64(1000000)]],
         ['list_subtitles', 'ListSubtitles', [], []],
+        ['mute', 'Mute', [], []],
+        ['unmute', 'Unmute', [], []],
         ['action', 'Action', ['p'], ['p']]
     ])
     def test_player_interface_commands(self, popen, sleep, isfile, killpg, command_name,
                                        interface_command_name, command_args, expected_dbus_call_args):
         self.patch_and_run_omxplayer()
-        interface = self.patch_interface_and_run_command('_player_interface', command_name, command_args)
+        self.player._player_interface.dbus_interface = "org.mpris.MediaPlayer2"
+        interface = self.player._player_interface
+        interface.reset_mock()
+
+        self.patch_interface_and_run_command(command_name, command_args)
 
         expected_call = getattr(call, interface_command_name)(*expected_dbus_call_args)
         interface.assert_has_calls([expected_call])
 
     @parameterized.expand([
-        ['can_play', 'CanPlay'],
-        ['can_seek', 'CanSeek'],
-        ['can_control', 'CanControl'],
-        ['playback_status', 'PlaybackStatus'],
-        ['volume', 'Volume'],
-        ['mute', 'Mute'],
-        ['unmute', 'Unmute'],
-        ['position', 'Position'],
-        ['duration', 'Duration'],
-        ['minimum_rate', 'MinimumRate'],
-        ['maximum_rate', 'MaximumRate'],
+        ['can_play', 'CanPlay', True, dbus.Boolean(True)],
+        ['can_seek', 'CanSeek', False, dbus.Boolean(False)],
+        ['can_control', 'CanControl', True, dbus.Boolean(True)],
+        ['playback_status', 'PlaybackStatus', "playing", dbus.String("playing")],
+        ['position', 'Position', 1.2, dbus.Int64(1_200_000)],
+        ['duration', 'Duration', 10.1, dbus.Int64(10_100_000)],
+        ['volume', 'Volume', 2000.0, dbus.Int64(10)],
+        ['minimum_rate', 'MinimumRate', 0.1, dbus.Double(0.1)],
+        ['maximum_rate', 'MaximumRate', 4.0, dbus.Double(4.0)],
     ])
-    def test_properties_interface_commands(self, popen, sleep, isfile, killpg,
-                                           command_name, property_name):
+    def test_player_interface_properties(self, popen, sleep, isfile, killpg,
+                        command_name, property_name, expected_result, property_result):
+        interface_address = "org.mpris.MediaPlayer2"
         self.patch_and_run_omxplayer()
-        properties_interface_dbus_address = "org.freedesktop.DBus.Properties"
-        self.player._player_interface.dbus_interface = properties_interface_dbus_address
-        interface = self.patch_interface_and_run_command('_properties_interface', command_name, [])
+        self.player._root_interface.dbus_interface = interface_address
+        interface = self.player._properties_interface
+        interface.reset_mock()
+        mock = interface.Get
+        mock.configure_mock(return_value=property_result)
 
-        interface.assert_has_calls([(call.Get(properties_interface_dbus_address, property_name))])
+        result = self.patch_interface_and_run_command(command_name, [])
+
+        interface.assert_has_calls([(call.Get(interface_address, property_name))])
+        self.assertEqual(expected_result, result)
 
     def test_quitting(self, popen, sleep, isfile, killpg, *args):
         omxplayer_process = Mock()
@@ -203,16 +220,10 @@ class OMXPlayerTests(unittest.TestCase):
 
         callback.assert_called_once_with(self.player, 5.01)
 
-    def patch_interface_and_run_command(self, interface_name, command_name, command_args):
-        interface = getattr(self.player, interface_name)
+    def patch_interface_and_run_command(self, command_name, command_args):
         self.player._process.poll = Mock(return_value=None)
-        interface.reset_mock()
-
-        getattr(self.player, command_name)(*command_args)
-
-        return interface
-
-        # generates a call of the form `call().CanQuit`
+        result = getattr(self.player, command_name)(*command_args)
+        return result
 
     # Must have the prefix 'patch' for the decorators to take effect
     def patch_and_run_omxplayer(self, Connection=Mock(), active=False):
