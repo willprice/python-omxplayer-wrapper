@@ -339,7 +339,7 @@ class OMXPlayer(object):
         Returns:
             int: position in seconds
         """
-        return self._position_us() / (1000 * 1000.0)
+        return self._position_us() / (1000.0 * 1000.0)
 
     @_check_player_is_active
     @_from_dbus_type
@@ -443,8 +443,7 @@ class OMXPlayer(object):
         Returns:
             float: The duration in seconds
         """
-        return self._duration_us() / (1000 * 1000.0)
-
+        return self._duration_us() / (1000.0 * 1000.0)
 
 
     """ PLAYER INTERFACE METHODS """
