@@ -443,8 +443,7 @@ class OMXPlayer(object):
         Returns:
             float: The duration in seconds
         """
-        return self._duration_us() / (1000 * 1000.0)
-
+        return self._duration_us() / (1000.0 * 1000.0)
 
 
     """ PLAYER INTERFACE METHODS """
