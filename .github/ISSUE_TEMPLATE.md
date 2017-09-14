@@ -1,4 +1,9 @@
 ## README
+
+**READ BELOW THE FOLD BEFORE REPORTING AN ISSUE**
+
+------
+
 If you're looking for **help** on how to use the library head over to the
 [Raspberry Pi forums](https://www.raspberrypi.org/forums/viewforum.php?f=32&sid=f1a4513e3e137272da39dbb11089e077)
 
@@ -6,7 +11,15 @@ If you're reporting an issue or requesting a feature, read on! Pick one of the
 following templates depending on your issue type.
 
 ------
-Delete above and including this line.
+
+If you're going to report an issue, please pick one of the template below:
+
+* Issue report
+* Feature request
+
+Delete the template you aren't using.
+
+**FINALLY, DELETE ALL THE ABOVE AND THIS LINE.**
 
 
 # Issue Report
