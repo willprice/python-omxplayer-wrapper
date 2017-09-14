@@ -49,6 +49,35 @@ def _check_player_is_active(fn):
     return decorator(wrapped, fn)
 
 def _from_dbus_type(fn):
+    def from_dbus_type(dbusVal):
+        def from_dbus_dict(dbusDict):
+            d = dict()
+            for dbusKey, dbusVal in dbusDict.items():
+                d[from_dbus_type(dbusKey)] = from_dbus_type(dbusVal)
+            return d
+
+        typeUnwrapper = {
+            dbus.types.Dictionary: from_dbus_dict,
+            dbus.types.Array: lambda x: list(map(from_dbus_type, x)),
+            dbus.types.Double: float,
+            dbus.types.Boolean: bool,
+            dbus.types.Byte: int,
+            dbus.types.Int16: int,
+            dbus.types.Int32: int,
+            dbus.types.UInt32: int,
+            dbus.types.Int64: int,
+            dbus.types.UInt32: int,
+            dbus.types.UInt64: int,
+            dbus.types.ByteArray: str,
+            dbus.types.ObjectPath: str,
+            dbus.types.Signature: str,
+            dbus.types.String: str
+        }
+        try:
+            return typeUnwrapper[type(dbusVal)](dbusVal)
+        except KeyError:
+            return dbusVal
+
     def wrapped(fn, self, *args, **kwargs):
             return from_dbus_type(fn(self, *args, **kwargs))
 
@@ -229,7 +258,7 @@ class OMXPlayer(object):
     def identity(self):
         """
         Returns:
-            str: 'omxplayer', the name of the player
+            str: Returns `omxplayer`, the name of the player
         """
         return self._root_interface_property('Identity')
 
@@ -238,7 +267,10 @@ class OMXPlayer(object):
     def supported_uri_schemes(self):
         """
         Returns:
-            str[]: list of supported URI schemes
+            str: list of supported URI schemes
+        Examples:
+            >>> player.supported_uri_schemes()
+            ["file", "http", "rtsp", "rtmp"]
         """
         return self._root_interface_property('SupportedUriSchemes')
 
@@ -251,7 +283,7 @@ class OMXPlayer(object):
     def can_go_next(self):
         """
         Returns:
-            bool: Whether the player can move to the next item in the playlist
+            bool: whether the player can move to the next item in the playlist
         """
         return self._player_interface_property('CanGoNext')
 
@@ -260,8 +292,8 @@ class OMXPlayer(object):
     def can_go_previous(self):
         """
         Returns:
-            bool: Whether the player can move to the previous item in the
-            playlist
+            bool: whether the player can move to the previous item in the
+                  playlist
         """
         return self._player_interface_property('CanGoPrevious')
 
@@ -270,7 +302,7 @@ class OMXPlayer(object):
     def can_seek(self):
         """
         Returns:
-            bool: Whether the player can seek """
+            bool: whether the player can seek """
         return self._player_interface_property('CanSeek')
 
     @_check_player_is_active
@@ -278,7 +310,7 @@ class OMXPlayer(object):
     def can_control(self):
         """
         Returns:
-            bool: """
+            bool: whether the player can be controlled"""
         return self._player_interface_property('CanControl')
 
     @_check_player_is_active
@@ -286,7 +318,7 @@ class OMXPlayer(object):
     def can_play(self):
         """
         Returns:
-            bool: """
+            bool: whether the player can play"""
         return self._player_interface_property('CanPlay')
 
     @_check_player_is_active
@@ -294,7 +326,7 @@ class OMXPlayer(object):
     def can_pause(self):
         """
         Returns:
-            bool: """
+            bool: whether the player can pause"""
         return self._player_interface_property('CanPause')
 
     @_check_player_is_active
@@ -302,7 +334,7 @@ class OMXPlayer(object):
     def playback_status(self):
         """
         Returns:
-            str: One of ("Playing" | "Paused" | "Stopped")
+            str: one of ("Playing" | "Paused" | "Stopped")
         """
         return self._player_interface_property('PlaybackStatus')
 
@@ -311,19 +343,19 @@ class OMXPlayer(object):
     def volume(self):
         """
         Returns:
-            float: Volume in millibels
+            float: current volume in millibels
         """
         vol = self._player_interface_property('Volume')
-        return 2000 * math.log(vol, 10)
+        return 2000.0 * math.log(vol, 10)
 
     @_check_player_is_active
     @_from_dbus_type
     def set_volume(self, volume):
         """
         Args:
-            float: Volume in millibels
+            float: volume in millibels
         """
-        return self._player_interface_property('Volume', dbus.Double(10**(volume/2000.0)))
+        return self._player_interface_property('Volume', dbus.Double(10**(volume / 2000.0)))
 
     @_check_player_is_active
     @_from_dbus_type
@@ -339,7 +371,7 @@ class OMXPlayer(object):
         Returns:
             int: position in seconds
         """
-        return self._position_us() / (1000 * 1000.0)
+        return self._position_us() / (1000.0 * 1000.0)
 
     @_check_player_is_active
     @_from_dbus_type
@@ -364,9 +396,9 @@ class OMXPlayer(object):
     def rate(self):
         """
         Returns:
-            float: playback rate
+            float: playback rate, 1 is the normal rate, 0.5 would be half speed and 2 would be double speed.
         """
-        return self._player_interface_property('MaximumRate')
+        return self._player_interface_property('Rate')
 
     @_check_player_is_active
     @_from_dbus_type
@@ -374,10 +406,11 @@ class OMXPlayer(object):
         """
         Set the playback rate of the video as a multiple of the default playback speed
 
-        e.g. `player.set_rate(2)` will play twice as fast and `player.set_rate(0.5)`
-             will play half speed.
-        Returns:
-            None:
+        Examples:
+            >>> player.set_rate(2)
+            # Will play twice as fast as normal speed
+            >>> player.set_rate(0.5)
+            # Will play half speed
         """
         return self._player_interface_property('Rate', dbus.Double(rate))
 
@@ -385,8 +418,14 @@ class OMXPlayer(object):
     @_from_dbus_type
     def metadata(self):
         """
-        Returns
+        Returns:
             dict: containing track information ('URI', 'length')
+        Examples:
+            >>> player.metadata()
+            {
+                'mpris:length': 19691000,
+                'xesam:url': 'file:///home/name/path/to/media/file.mp4'
+            }
         """
         return self._player_interface_property('Metadata')
 
@@ -396,7 +435,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def aspect_ratio(self):
         """
-        Returns
+        Returns:
             float: aspect ratio
         """
         return self._player_interface_property('Aspect')
@@ -405,7 +444,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def video_stream_count(self):
         """
-        Returns
+        Returns:
             int: number of video streams
         """
         return self._player_interface_property('VideoStreamCount')
@@ -414,7 +453,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def width(self):
         """
-        Returns
+        Returns:
             int: video width in px
         """
         return self._player_interface_property('ResWidth')
@@ -423,7 +462,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def height(self):
         """
-        Returns
+        Returns:
             int: video height in px
         """
         return self._player_interface_property('ResHeight')
@@ -432,7 +471,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def _duration_us(self):
         """
-        Returns
+        Returns:
             int: total length in microseconds
         """
         return self._player_interface_property('Duration')
@@ -441,10 +480,9 @@ class OMXPlayer(object):
     def duration(self):
         """
         Returns:
-            float: The duration in seconds
+            float: duration in seconds
         """
-        return self._duration_us() / (1000 * 1000.0)
-
+        return self._duration_us() / (1000.0 * 1000.0)
 
 
     """ PLAYER INTERFACE METHODS """
@@ -452,8 +490,7 @@ class OMXPlayer(object):
     @_check_player_is_active
     def pause(self):
         """
-        Return:
-            None:
+        Pause playback
         """
         self._player_interface.Pause()
         self._is_playing = False
@@ -462,8 +499,7 @@ class OMXPlayer(object):
     @_check_player_is_active
     def play_pause(self):
         """
-        Return:
-            None:
+        Pause playback if currently playing, otherwise start playing if currently paused.
         """
         self._player_interface.PlayPause()
         self._is_playing = not self._is_playing
@@ -475,6 +511,9 @@ class OMXPlayer(object):
     @_check_player_is_active
     @_from_dbus_type
     def stop(self):
+        """
+        Stop the player, causing it to quit
+        """
         self._player_interface.Stop()
         self.stopEvent(self)
 
@@ -482,6 +521,8 @@ class OMXPlayer(object):
     @_from_dbus_type
     def seek(self, relative_position):
         """
+        Seek the video by `relative_position` seconds
+
         Args:
             relative_position (float): The position in seconds to seek to.
         """
@@ -492,6 +533,8 @@ class OMXPlayer(object):
     @_from_dbus_type
     def set_position(self, position):
         """
+        Set the video to playback position to `position` seconds from the start of the video
+
         Args:
             position (float): The position in seconds.
         """
@@ -502,6 +545,8 @@ class OMXPlayer(object):
     @_from_dbus_type
     def set_alpha(self, alpha):
         """
+        Set the transparency of the video overlay
+
         Args:
             alpha (float): The transparency (0..255)
         """
@@ -510,22 +555,14 @@ class OMXPlayer(object):
     @_check_player_is_active
     def mute(self):
         """
-        Turns mute on, if the audio is already muted, then this does not do
-        anything
-
-        Returns:
-            None:
+        Mute audio. If already muted, then this does not do anything
         """
         self._player_interface.Mute()
 
     @_check_player_is_active
     def unmute(self):
         """
-        Unmutes the video, if the audio is already unmuted, then this does
-        not do anything
-
-        Returns:
-            None:
+        Unmutes the video. If already unmuted, then this does not do anything
         """
         self._player_interface.Unmute()
 
@@ -534,6 +571,8 @@ class OMXPlayer(object):
     @_from_dbus_type
     def set_aspect_mode(self, mode):
         """
+        Set the aspect mode of the video
+
         Args:
             mode (str): One of ("letterbox" | "fill" | "stretch")
         """
@@ -543,8 +582,13 @@ class OMXPlayer(object):
     @_from_dbus_type
     def set_video_pos(self, x1, y1, x2, y2):
         """
+        Set the video position on the screen
+
         Args:
-            Image position (int, int, int, int):
+            x1 (int): Top left x coordinate (px)
+            y1 (int): Top left y coordinate (px)
+            x2 (int): Bottom right x coordinate (px)
+            y2 (int): Bottom right y coordinate (px)
         """
         position = "%s %s %s %s" % (str(x1),str(y1),str(x2),str(y2))
         self._player_interface.VideoPos(ObjectPath('/not/used'), String(position))
@@ -553,8 +597,10 @@ class OMXPlayer(object):
     def video_pos(self):
         """
         Returns:
+            (int, int, int, int): Video spatial position (x1, y1, x2, y2) where (x1, y1) is top left,
+                                  and (x2, y2) is bottom right. All values in px.
         """
-        position_string = self._player_interface.VideoPos(ObjectPath('/not/used'), String(position))
+        position_string = self._player_interface.VideoPos(ObjectPath('/not/used'))
         return list(map(int, position_string.split(" ")))
 
     @_check_player_is_active
@@ -562,7 +608,10 @@ class OMXPlayer(object):
     def set_video_crop(self, x1, y1, x2, y2):
         """
         Args:
-            Image position (int, int, int, int):
+            x1 (int): Top left x coordinate (px)
+            y1 (int): Top left y coordinate (px)
+            x2 (int): Bottom right x coordinate (px)
+            y2 (int): Bottom right y coordinate (px)
         """
         crop = "%s %s %s %s" % (str(x1),str(y1),str(x2),str(y2))
         self._player_interface.SetVideoCropPos(ObjectPath('/not/used'), String(crop))
@@ -570,14 +619,14 @@ class OMXPlayer(object):
     @_check_player_is_active
     def hide_video(self):
         """
-        TODO
+        Hides the video overlays
         """
         self._player_interface.HideVideo()
 
     @_check_player_is_active
     def show_video(self):
         """
-        TODO
+        Shows the video (to undo a `hide_video`)
         """
         self._player_interface.UnHideVideo()
 
@@ -587,7 +636,7 @@ class OMXPlayer(object):
         """
         Returns:
             [str]: A list of all known audio streams, each item is in the
-            format: ``<index>:<language>:<name>:<codec>:<active>``
+                   format: ``<index>:<language>:<name>:<codec>:<active>``
         """
         return self._player_interface.ListAudio()
 
@@ -597,7 +646,7 @@ class OMXPlayer(object):
         """
         Returns:
             [str]: A list of all known video streams, each item is in the
-            format: ``<index>:<language>:<name>:<codec>:<active>``
+                   format: ``<index>:<language>:<name>:<codec>:<active>``
         """
         return self._player_interface.ListVideo()
 
@@ -608,35 +657,41 @@ class OMXPlayer(object):
         """
         Returns:
             [str]: A list of all known subtitles, each item is in the
-            format: ``<index>:<language>:<name>:<codec>:<active>``
+                   format: ``<index>:<language>:<name>:<codec>:<active>``
         """
         return self._player_interface.ListSubtitles()
 
     @_check_player_is_active
     def select_subtitle(self, index):
         """
-        TODO
+        Enable a subtitle specified by the index it is listed in :class:`list_subtitles`
+
+        Args:
+            index (int): index of subtitle listing returned by :class:`list_subtitles`
         """
         return self._player_interface.SelectSubtitle(dbus.Int32(index))
 
     @_check_player_is_active
     def select_audio(self, index):
         """
-        TODO
+        Select audio stream specified by the index of the stream in :class:`list_audio`
+
+        Args:
+            index (int): index of audio stream returned by :class:`list_audio`
         """
         return self._player_interface.SelectAudio(dbus.Int32(index))
 
     @_check_player_is_active
     def show_subtitles(self):
         """
-        TODO
+        Shows subtitles after :class:`hide_subtitles`
         """
         return self._player_interface.ShowSubtitles()
 
     @_check_player_is_active
     def hide_subtitles(self):
         """
-        TODO
+        Hide subtitles
         """
         return self._player_interface.HideSubtitles()
 
@@ -649,9 +704,6 @@ class OMXPlayer(object):
         Args:
             code (int): The key code you wish to emulate
                         refer to ``keys.py`` for the possible keys
-
-        Returns:
-            None:
         """
         self._player_interface.Action(code)
 
@@ -670,8 +722,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def play_sync(self):
         """
-        Returns:
-            None:
+        Play the video and block whilst the video is playing
         """
         self.play()
         logger.info("Playing synchronously")
@@ -689,8 +740,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def play(self):
         """
-        Returns:
-            None:
+        Play the video asynchronously returning control immediately to the calling code
         """
         if not self.is_playing():
             self.play_pause()
@@ -701,7 +751,10 @@ class OMXPlayer(object):
     @_from_dbus_type
     def next(self):
         """
-        TODO
+        Skip to the next chapter
+
+        Returns:
+            bool: Whether the player skipped to the next chapter
         """
         return self._player_interface.Next()
 
@@ -709,7 +762,10 @@ class OMXPlayer(object):
     @_from_dbus_type
     def previous(self):
         """
-        TODO
+        Skip to the previous chapter
+
+        Returns:
+            bool: Whether the player skipped to the previous chapter
         """
         return self._player_interface.Previous()
 
@@ -738,6 +794,9 @@ class OMXPlayer(object):
         return self._interface_property(self._player_interface.dbus_interface, prop, val)
 
     def quit(self):
+        """
+        Quit the player, blocking until the process has died
+        """
         try:
             logger.debug('Quitting OMXPlayer')
             process_group_id = os.getpgid(self._process.pid)
@@ -755,6 +814,8 @@ class OMXPlayer(object):
     @_from_dbus_type
     def get_source(self):
         """
+        Get the source URI of the currently playing media
+
         Returns:
             str: source currently playing
         """
@@ -774,34 +835,6 @@ class OMXPlayer(object):
         return self.get_source()
 
 
-def from_dbus_type(dbusVal):
-    def from_dbus_dict(dbusDict):
-        d = dict()
-        for dbusKey, dbusVal in dbusDict.items():
-            d[from_dbus_type(dbusKey)] = from_dbus_type(dbusVal)
-        return d
-
-    typeUnwrapper = {
-        dbus.types.Dictionary: from_dbus_dict,
-        dbus.types.Array: lambda x: list(map(from_dbus_type, x)),
-        dbus.types.Double: float,
-        dbus.types.Boolean: bool,
-        dbus.types.Byte: int,
-        dbus.types.Int16: int,
-        dbus.types.Int32: int,
-        dbus.types.UInt32: int,
-        dbus.types.Int64: int,
-        dbus.types.UInt32: int,
-        dbus.types.UInt64: int,
-        dbus.types.ByteArray: str,
-        dbus.types.ObjectPath: str,
-        dbus.types.Signature: str,
-        dbus.types.String: str
-    }
-    try:
-        return typeUnwrapper[type(dbusVal)](dbusVal)
-    except KeyError:
-        return dbusVal
 
 #  MediaPlayer2.Player types:
 #    Track_Id: DBus ID of track
