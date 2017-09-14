@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[packages]
+evento = "==1.0.1"
+
+[dev-packages]
+tox = "*"
+mock = "*"
+nose = "*"
+parameterized = "==0.6.1"
+coverage = "*"
+Sphinx = "==1.6.3"
+Pygments = "==2.2.0"

@@ -1,8 +1,10 @@
 PYTHON2:=python2
 PYTHON3:=python3
 
-.PHONY: check
-check: test
+.PHONY: init
+init:
+	pip install pipenv
+	pipenv install --dev
 
 .PHONY: test
 test:
@@ -22,3 +24,7 @@ clean-dist:
 .PHONY: doc
 doc:
 	$(MAKE) -C docs html
+
+.PHONY: doc-serve
+doc-serve: doc
+	cd docs/build/html && $(PYTHON3) -m http.server
