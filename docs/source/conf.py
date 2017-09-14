@@ -22,14 +22,6 @@ from mock import MagicMock
 sys.path.insert(0, os.path.abspath('../../'))
 
 
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
-
-MOCK_MODULES = ['dbus']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -41,7 +33,6 @@ sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 extensions = [
     'sphinx.ext.autodoc',
     'sphinxcontrib.napoleon',
-    'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -63,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'omxplayer-wrapper'
-copyright = u'2015, Will Price'
+copyright = u'2017, Will Price'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
