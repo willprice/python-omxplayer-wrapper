@@ -1,27 +1,15 @@
-dist: trusty
-sudo: false
 language: python
 python:
-    - 2.7_with_system_site_packages
-      # Ideally I'd like to test with 3.6 but since 3.4 is the latest in
-      # trusty we have to use that instead
-    - 3.4_with_system_site_packages
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - nightly
 
 cache:
-    - pip
-    - apt
-
-addons:
-  apt:
-    packages:
-      - python-dbus
-      - python3-dbus
+  - pip
 
 install:
-  # Necessary to prevent SSL failures in further steps as pipenv requires 
-  # Example failed build:
-  # https://travis-ci.org/willprice/python-omxplayer-wrapper/jobs/275697103
-  - pip install --upgrade requests[security]
   - make init
   - pip install tox-travis
 
