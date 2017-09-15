@@ -21,6 +21,7 @@ addons:
 
 before_install:
   - echo "Python diagnostic Information"
+  - which -a python
   - python --version
   - python-config --includes
   - python-config --libs
