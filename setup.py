@@ -34,7 +34,7 @@ setup(
                       'raspberry_pi',
                       'library',
                       'video',
-                      'media'])
+                      'media']),
 
     packages=find_packages(exclude=['*tests']),
     # Depends on dbus-python which is only shipped via package managers or as a
