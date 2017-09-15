@@ -19,6 +19,13 @@ addons:
       - libdbus-1-dev
       - libdbus-glib-1-dev
 
+before_install:
+  - echo "Python diagnostic Information"
+  - python --version
+  - python-config --includes
+  - python-config --libs
+  - python-config --ldflags
+
 install:
   - make init
   - pip install tox-travis
