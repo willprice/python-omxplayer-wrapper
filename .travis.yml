@@ -21,7 +21,7 @@ install:
   # Necessary to prevent SSL failures in further steps as pipenv requires 
   # Example failed build:
   # https://travis-ci.org/willprice/python-omxplayer-wrapper/jobs/275697103
-  - sudo pip install --upgrade requests
+  - pip install --upgrade requests
   - make init
   - pip install tox-travis
 
