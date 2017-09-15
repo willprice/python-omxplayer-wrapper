@@ -30,10 +30,8 @@ before_install:
   - ls -l ~/virtualenv
 
 install:
-  # Upgrade pip to recent version, travis' is ancient,
-  # causes bugs like: https://github.com/testing-cabal/mock/issues/316
-  - pip install --upgrade pip
-  - make init
+  # tox manages its own dependencies in virtual environments so there's no point
+  # installing them here
   - pip install tox-travis
 
 script:
