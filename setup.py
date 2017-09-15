@@ -40,7 +40,8 @@ setup(
     # Depends on dbus-python which is only shipped via package managers or as a
     # source dist (incompatible with distutils)
     install_requires=[
-        'evento'
+        'evento',
+        'decorator',
     ],
     extras_require={
         'test': [
