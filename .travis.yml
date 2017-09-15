@@ -30,9 +30,8 @@ before_install:
   - ls -l ~/virtualenv
 
 install:
-  # tox manages its own dependencies in virtual environments so there's no point
-  # installing them here
-  - pip install tox-travis
+  - pip install --user pipenv
+  - pipenv install --dev
 
 script:
   - make test
