@@ -21,7 +21,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
         return MagicMock()
 
-MOCK_MODULES = ["dbus"]
+MOCK_MODULES = ["dbus", "dbus.types"]
 sys.modules.update((module, Mock()) for module in MOCK_MODULES)
 
 
