@@ -1,23 +1,25 @@
 Installation:
 -------------
 
+You'll need the following dependencies:
+
+* `libdbus-1`
+* `libdbus-1-dev`
+
+OS pre-requisite installation
+
+.. code-block:: bash
+
+  $ sudo apt-get update && sudo apt-get install -y libdbus-1{,-dev}
+
 With `pipenv <http://docs.pipenv.org/en/latest/>`_
 
 .. code-block:: bash
 
-  $ sudo apt-get install python-dbus python3-dbus
   $ pipenv install omxplayer-wrapper
 
-Python 2
+With Pip
 
 .. code-block:: bash
 
-  $ sudo apt-get install python-dbus
   $ pip install omxplayer-wrapper
-
-Python 3
-
-.. code-block:: bash
-
-  $ sudo apt-get install python3-dbus
-  $ pip3 install omxplayer-wrapper
