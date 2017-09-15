@@ -30,7 +30,7 @@ before_install:
   - ls -l ~/virtualenv
 
 install:
-  - pip install --user pipenv
+  - pip install pipenv
   - pipenv install --dev
 
 script:
