@@ -20,11 +20,12 @@ addons:
 
 before_install:
   - echo "Python diagnostic Information"
-  - which -a python
+  - 'which -a python'
   - python --version
   - python-config --includes
   - python-config --libs
   - python-config --ldflags
+  - ls -l ~/virtualenv
 
 install:
   # Upgrade pip to recent version, travis' is ancient,
