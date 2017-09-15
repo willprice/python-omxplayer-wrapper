@@ -18,11 +18,11 @@ addons:
       - python3-dbus
 
 install:
-  - pip install -r requirements.txt
+  - make init
   - pip install tox-travis
 
 script:
-  - make check
+  - make test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
