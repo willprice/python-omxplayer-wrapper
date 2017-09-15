@@ -27,7 +27,9 @@ before_install:
   - python-config --ldflags
 
 install:
-  - [[ $TRAVIS_PYTHON_VERSION == '2.7' ]] && pip install funcsigs
+  # Upgrade pip to recent version, travis' is ancient,
+  # causes bugs like: https://github.com/testing-cabal/mock/issues/316
+  - pip install --upgrade pip
   - make init
   - pip install tox-travis
 
