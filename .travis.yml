@@ -18,11 +18,10 @@ addons:
       - python3-dbus
 
 install:
-  # necessary to prevent SSL failures in further steps (see
-  # https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings)
+  # Necessary to prevent SSL failures in further steps as pipenv requires 
   # Example failed build:
-  # http://travis-ci.org/willprice/python-omxplayer-wrapper/jobs/275695696
-  - pip install urllib3[secure] 
+  # https://travis-ci.org/willprice/python-omxplayer-wrapper/jobs/275697103
+  - sudo pip install --upgrade requests
   - make init
   - pip install tox-travis
 
