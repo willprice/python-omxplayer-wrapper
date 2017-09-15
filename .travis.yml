@@ -27,6 +27,7 @@ before_install:
   - python-config --ldflags
 
 install:
+  - [[ $TRAVIS_PYTHON_VERSION == '2.7' ]] && pip install funcsigs
   - make init
   - pip install tox-travis
 
