@@ -4,7 +4,8 @@ verify_ssl = true
 
 [packages]
 evento = "==1.0.1"
-decorator = "*"
+dbus-python = "==1.2.4"
+decorator = "==4.1.2"
 
 [dev-packages]
 tox = "*"

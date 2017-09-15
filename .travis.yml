@@ -1,27 +1,37 @@
-dist: trusty
+# Use container based infra
 sudo: false
 language: python
 python:
-    - 2.7_with_system_site_packages
-      # Ideally I'd like to test with 3.6 but since 3.4 is the latest in
-      # trusty we have to use that instead
-    - 3.4_with_system_site_packages
+  - 2.7
+  - 3.4
+#  - 3.5
+#  - 3.6
 
 cache:
-    - pip
-    - apt
+  - pip
+  - apt
 
 addons:
   apt:
     packages:
-      - python-dbus
-      - python3-dbus
+      - dbus
+      - libdbus-1-dev
+      - libdbus-glib-1-dev
+
+before_install:
+  - echo "Python diagnostic Information"
+  - 'which -a python'
+  - python --version
+  - python-config --includes
+  - python-config --libs
+  - python-config --ldflags
+  - pip --version
+  - ls -l ~/virtualenv
 
 install:
-  # Necessary to prevent SSL failures in further steps as pipenv requires 
-  # Example failed build:
-  # https://travis-ci.org/willprice/python-omxplayer-wrapper/jobs/275697103
-  - pip install --upgrade requests[security]
+  # Upgrade pip to recent version, travis' is ancient,
+  # causes bugs like: https://github.com/testing-cabal/mock/issues/316
+  - pip install --upgrade pip
   - make init
   - pip install tox-travis
 
