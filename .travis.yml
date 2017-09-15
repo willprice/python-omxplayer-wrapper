@@ -25,6 +25,7 @@ before_install:
   - python-config --includes
   - python-config --libs
   - python-config --ldflags
+  - pip --version
   - ls -l ~/virtualenv
 
 install:
