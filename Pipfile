@@ -4,6 +4,7 @@ verify_ssl = true
 
 [packages]
 evento = "==1.0.1"
+decorator = "*"
 
 [dev-packages]
 tox = "*"
@@ -11,5 +12,5 @@ mock = "*"
 nose = "*"
 parameterized = "==0.6.1"
 coverage = "*"
-Sphinx = "==1.6.3"
-Pygments = "==2.2.0"
+sphinx = "==1.6.3"
+pygments = "==2.2.0"

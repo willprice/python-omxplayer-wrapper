@@ -1,20 +1,20 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9386c088eeaeeace55cc8a6614b52af91585930e3e310219a32a8e35739f4d81"
+            "sha256": "29ceb2a9c3f374976619c1a73788f2386afb4fee497ed2d83fef29230721e06f"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
-            "implementation_version": "0",
+            "implementation_version": "3.6.2",
             "os_name": "posix",
             "platform_machine": "x86_64",
             "platform_python_implementation": "CPython",
             "platform_release": "4.12.8-1-ARCH",
             "platform_system": "Linux",
             "platform_version": "#1 SMP PREEMPT Thu Aug 17 08:37:20 CEST 2017",
-            "python_full_version": "2.7.13",
-            "python_version": "2.7",
-            "sys_platform": "linux2"
+            "python_full_version": "3.6.2",
+            "python_version": "3.6",
+            "sys_platform": "linux"
         },
         "pipfile-spec": 3,
         "requires": {},
@@ -26,6 +26,13 @@
         ]
     },
     "default": {
+        "decorator": {
+            "hashes": [
+                "sha256:95a26b17806e284452bfd97fa20aa1e8cb4ee23542bda4dbac5e4562aa1642cd",
+                "sha256:7cb64d38cb8002971710c8899fbdfb859a23a364b7c99dab19d1f719c2ba16b5"
+            ],
+            "version": "==4.1.2"
+        },
         "evento": {
             "hashes": [
                 "sha256:2644a88e4e0a395f0d372ce0b5627506cb29547788bdd97e8fb2240dfe341b13"
@@ -111,13 +118,6 @@
                 "sha256:51e64ef2ebfb29cae1faa133b3710143496eca21c530f3f71424d77687764274"
             ],
             "version": "==0.14"
-        },
-        "funcsigs": {
-            "hashes": [
-                "sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca",
-                "sha256:a7bb0f2cf3a3fd1ab2732cb49eba4252c2af4240442415b4abce3b87022a8f50"
-            ],
-            "version": "==1.0.2"
         },
         "idna": {
             "hashes": [
@@ -250,14 +250,6 @@
                 "sha256:d9c279e707d2cfef8d77d10f13b38b3e68b7e470018b45747560f6c3c66d6b83"
             ],
             "version": "==2.8.2"
-        },
-        "typing": {
-            "hashes": [
-                "sha256:349b1f9c109c84b53ac79ac1d822eaa68fc91d63b321bd9392df15098f746f53",
-                "sha256:63a8255fe7c6269916baa440eb9b6a67139b0b97a01af632e7bd2842e1e02f15",
-                "sha256:d514bd84b284dd3e844f0305ac07511f097e325171f6cc4a20878d11ad771849"
-            ],
-            "version": "==3.6.2"
         },
         "urllib3": {
             "hashes": [
