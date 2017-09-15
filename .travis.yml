@@ -10,6 +10,14 @@ python:
 
 cache:
   - pip
+  - apt
+
+addons:
+  apt:
+    packages:
+      - dbus
+      - libdbus-1-dev
+      - libdbus-glib-1-dev
 
 install:
   - make init
