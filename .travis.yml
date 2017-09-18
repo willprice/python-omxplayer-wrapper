@@ -27,6 +27,7 @@ before_install:
   - python-config --libs
   - python-config --ldflags
   - pip --version
+  - pip install dbus-python
   - ls -l ~/virtualenv
 
 install:
