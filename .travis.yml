@@ -21,6 +21,8 @@ addons:
 before_install:
   - echo "Python diagnostic Information"
   - pyenv versions
+  - pyenv local
+  - pyenv global
   - 'which -a python'
   - python --version
   - python-config --includes
