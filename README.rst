@@ -1,8 +1,8 @@
 Python OMXPlayer wrapper
 ========================
 
-|PyPI Version| |PyPI Python versions| |PyPI License| |Documentation
-Status| |Build Status| |Code Coverage| |Say Thanks!|
+|PyPI Version| |PyPI Python versions| |PyPI License| |Documentation Status| 
+|Build Status| |Code Coverage| |Say Thanks!|
 
 .. include:: docs/tagline.rst
 
@@ -22,8 +22,8 @@ You can read the docs at `python-omxplayer-wrapper.rtfd.org
    :target: https://pypi.python.org/pypi/omxplayer-wrapper
 .. |PyPI License| image:: https://img.shields.io/pypi/l/omxplayer-wrapper.svg?maxAge=2592000
    :target: https://pypi.python.org/pypi/omxplayer-wrapper
-.. |Documentation Status| image:: https://readthedocs.org/projects/python-omxplayer-wrapper/badge/?version=latest
-   :target: http://python-omxplayer-wrapper.readthedocs.io/en/latest/?badge=latest
+.. |Documentation Status| image:: https://readthedocs.org/projects/python-omxplayer-wrapper/badge?version=master
+   :target: http://python-omxplayer-wrapper.readthedocs.io/en/master?badge=master
    :alt: Documentation Status
 .. |Build Status| image:: https://travis-ci.org/willprice/python-omxplayer-wrapper.svg?branch=master
    :target: https://travis-ci.org/willprice/python-omxplayer-wrapper
