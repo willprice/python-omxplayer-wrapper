@@ -8,7 +8,6 @@ dbus-python = "==1.2.4"
 decorator = "==4.1.2"
 
 [dev-packages]
-tox = "*"
 mock = "*"
 nose = "*"
 parameterized = "==0.6.1"

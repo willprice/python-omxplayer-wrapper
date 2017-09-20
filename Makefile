@@ -8,10 +8,20 @@ init:
 
 .PHONY: test
 test:
+	nosetests \
+		--with-coverage \
+		--cover-erase \
+		--cover-xml \
+		--cover-branches \
+		--cover-package=omxplayer \
+		tests/unit
+
+.PHONY: test
+test-all:
 	tox
 
 .PHONY: dist
-dist: test
+dist: test-all
 	$(PYTHON3) setup.py bdist_wheel --universal
 
 dist-upload: clean-dist dist
