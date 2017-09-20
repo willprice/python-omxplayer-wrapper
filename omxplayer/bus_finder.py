@@ -1,9 +1,10 @@
 import os.path
 import time
 from glob import glob
-from logging import getLogger
+import logging
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class BusFinder(object):
