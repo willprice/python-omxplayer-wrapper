@@ -19,6 +19,7 @@ addons:
       - libdbus-glib-1-dev
 
 before_install:
+  - env
   - echo "Python diagnostic Information"
   - pyenv --version
   - pyenv versions
