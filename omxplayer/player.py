@@ -30,6 +30,7 @@ RETRY_DELAY = 0.05
 
 #### FILE GLOBAL OBJECTS ####
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 

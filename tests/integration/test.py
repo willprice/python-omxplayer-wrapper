@@ -16,7 +16,7 @@ _VOLUME_DP=3
 
 
 class OMXPlayerTest(unittest.TestCase):
-    MEDIA_FILE_PATH = './media/test_media_1.mp4'
+    MEDIA_FILE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../media/test_media_1.mp4')
 
     def setUp(self):
         self.player = OMXPlayer(self.MEDIA_FILE_PATH)
@@ -90,12 +90,16 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
         self.assertAlmostEqual(4.0, self.player.maximum_rate(), _RATE_DP)
 
     def test_rate(self):
-        self.assertAlmostEqual(4.0, self.player.rate(), _RATE_DP)
+        self.assertAlmostEqual(1.0, self.player.rate(), _RATE_DP)
 
     def test_set_rate(self):
-        self.assertAlmostEqual(4.0, self.player.rate(), _RATE_DP)
-        self.player.set_rate(1)
-        self.assertAlmostEqual(1, self.player.rate(), _RATE_DP)
+        self.assertAlmostEqual(1.0, self.player.rate(), _RATE_DP)
+        new_rate = 0.5
+
+        self.player.set_rate(new_rate)
+        sleep(0.05)
+
+        self.assertAlmostEqual(new_rate, self.player.rate(), _RATE_DP)
 
     def test_metadata(self):
         expectedMetadata = {
@@ -170,7 +174,10 @@ class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
 
     def test_mute(self):
         self.player.set_volume(1)
+
         self.player.mute()
+        sleep(0.05)
+
         self.assertAlmostEqual(0, self.player.volume(), _VOLUME_DP)
 
     def test_unmute(self):
