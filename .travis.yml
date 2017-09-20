@@ -21,6 +21,7 @@ addons:
 before_install:
   - env
   - echo "Python diagnostic Information"
+  - pyenv local $TRAVIS_PYTHON_VERSION
   - pyenv --version
   - pyenv versions
   - pyenv global
