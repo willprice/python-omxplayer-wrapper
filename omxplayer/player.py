@@ -170,9 +170,6 @@ class OMXPlayer(object):
 
     def _setup_omxplayer_process(self, source):
             logger.debug('Setting up OMXPlayer process')
-            source_url = urlsplit(source)
-            if not source_url.scheme and not os.path.isfile(source):
-                raise FileNotFoundError("Could not find: {}".format(source))
             with open(os.devnull, 'w') as devnull:
                 process = self._run_omxplayer(source, devnull)
                 logger.debug('Process opened with PID %s' % process.pid)
