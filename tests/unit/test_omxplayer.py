@@ -137,16 +137,6 @@ class OMXPlayerTests(unittest.TestCase):
 
         process.poll.assert_called_once_with()
 
-    def test_checks_media_file_exists_before_launching_player(self, *args):
-        with patch('os.path') as ospath:
-            self.patch_and_run_omxplayer()
-            ospath.isfile.assert_called_once_with(self.TEST_FILE_NAME)
-
-    def test_player_doesnt_check_source_path_exists_for_a_url(self, *args):
-        with patch('os.path') as ospath:
-            self.patch_and_run_omxplayer_url()
-            ospath.isfile.assert_not_called()
-
     def test_stop_event(self, *args):
         self.patch_and_run_omxplayer(active=True)
         callback = Mock()

@@ -3,11 +3,14 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 
 [packages]
+
 evento = "==1.0.1"
 dbus-python = "==1.2.4"
 decorator = "==4.1.2"
+funcsigs = "*"
 
 [dev-packages]
+
 mock = "*"
 nose = "*"
 parameterized = "==0.6.1"
