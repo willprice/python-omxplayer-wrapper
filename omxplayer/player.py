@@ -155,6 +155,10 @@ class OMXPlayer(object):
             process.wait()
             on_exit()
 
+        try:
+            source = str(source.resolve())
+        except AttributeError:
+            pass
         command = ['omxplayer'] + self.args + [source]
         if self._dbus_name:
             command += ['--dbus_name', self._dbus_name]
