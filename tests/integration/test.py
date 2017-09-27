@@ -6,8 +6,7 @@ import dbus
 
 import unittest
 
-import omxplayer.keys
-from omxplayer import OMXPlayer
+from omxplayer import OMXPlayer, keys
 
 # Decimal places for numerical comparison
 _TIME_DP=0
@@ -97,7 +96,7 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
         new_rate = 0.5
 
         self.player.set_rate(new_rate)
-        sleep(0.05)
+        sleep(0.2)
 
         self.assertAlmostEqual(new_rate, self.player.rate(), _RATE_DP)
 
@@ -176,13 +175,14 @@ class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
         self.player.set_volume(1)
 
         self.player.mute()
-        sleep(0.05)
 
         self.assertAlmostEqual(0, self.player.volume(), _VOLUME_DP)
 
     def test_unmute(self):
         self.player.set_volume(1)
         self.player.mute()
+        self.assertAlmostEqual(0, self.player.volume(), _VOLUME_DP)
+
         self.player.unmute()
         self.assertAlmostEqual(1, self.player.volume(), _VOLUME_DP)
 
@@ -217,7 +217,7 @@ class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
         self.player.hide_subtitles()
 
     def test_action(self):
-        self.player.action(omxplayer.keys.SHOW_INFO)
+        self.player.action(keys.SHOW_INFO)
 
 class OMXPlayerPlayerInterfaceNonStandardMethodsTest(OMXPlayerTest):
     pass
