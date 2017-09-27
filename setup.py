@@ -8,7 +8,7 @@ setup(
     author_email='will.price94+dev@gmail.com',
     url='https://github.com/willprice/python-omxplayer-wrapper',
 
-    version='0.2.3',
+    version='0.2.4',
 
     description='Control OMXPlayer on the Raspberry Pi',
     long_description='Control OMXPlayer on the Raspberry Pi through DBus',
