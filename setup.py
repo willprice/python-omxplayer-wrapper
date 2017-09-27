@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 from setuptools import setup, find_packages
+import omxplayer
 
 setup(
     name='omxplayer-wrapper',
@@ -8,7 +9,7 @@ setup(
     author_email='will.price94+dev@gmail.com',
     url='https://github.com/willprice/python-omxplayer-wrapper',
 
-    version='0.2.4',
+    version=omxplayer.__version__,
 
     description='Control OMXPlayer on the Raspberry Pi',
     long_description='Control OMXPlayer on the Raspberry Pi through DBus',
