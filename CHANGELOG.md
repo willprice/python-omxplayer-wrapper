@@ -1,3 +1,7 @@
+# 0.2.4 -> 0.2.5
+
+* Correct `omxplayer.__version__` to return 0.2.5 instead of 0.2.3 (in 0.2.4)
+
 # 0.2.3 -> 0.2.4
 
 * New methods:
