@@ -150,6 +150,7 @@ class OMXPlayer(object):
 
         self._process = self._setup_omxplayer_process(source)
         self._rate = 1.0
+        self._is_muted = False
         self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
     def _run_omxplayer(self, source, devnull):
@@ -351,19 +352,23 @@ class OMXPlayer(object):
     def volume(self):
         """
         Returns:
-            float: current volume in millibels
+            float: current player volume
         """
-        vol = self._player_interface_property('Volume')
-        return 2000.0 * math.log(vol, 10)
+        if self._is_muted:
+            return 0
+        return self._player_interface_property('Volume')
 
     @_check_player_is_active
     @_from_dbus_type
     def set_volume(self, volume):
         """
         Args:
-            float: volume in millibels
+            float: volume in the interval [0, 10]
         """
-        return self._player_interface_property('Volume', dbus.Double(10**(volume / 2000.0)))
+        # 0 isn't handled correctly so we have to set it to a very small value to achieve the same purpose
+        if volume == 0:
+            volume = 1e-10
+        return self._player_interface_property('Volume', dbus.Double(volume))
 
     @_check_player_is_active
     @_from_dbus_type
@@ -566,6 +571,7 @@ class OMXPlayer(object):
         """
         Mute audio. If already muted, then this does not do anything
         """
+        self._is_muted = True
         self._player_interface.Mute()
 
     @_check_player_is_active
@@ -573,6 +579,7 @@ class OMXPlayer(object):
         """
         Unmutes the video. If already unmuted, then this does not do anything
         """
+        self._is_muted = False
         self._player_interface.Unmute()
 
 
