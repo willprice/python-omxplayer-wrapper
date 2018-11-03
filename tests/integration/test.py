@@ -6,6 +6,8 @@ import dbus
 
 import unittest
 
+from mock import Mock
+
 from omxplayer import OMXPlayer, keys
 
 # Decimal places for numerical comparison
@@ -13,7 +15,9 @@ _TIME_DP=0
 _RATE_DP=2
 _VOLUME_DP=3
 
-MEDIA_FILE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../media/test_media_1.mp4')
+MEDIA_ROOT = Path(os.path.abspath(os.path.dirname(__file__))) / '../media/'
+MEDIA_FILE_PATH = MEDIA_ROOT / 'test_media_1.mp4'
+MEDIA_2_SECOND_FILE_PATH = MEDIA_ROOT / 'test_media_2_second.mp4'
 
 
 class OMXPlayerTest(unittest.TestCase):
@@ -37,8 +41,8 @@ class OMXPlayerSetupTests(unittest.TestCase):
         sleep(1)
         player.quit()
 
-    def test_pathlib_path_media_file(self):
-        player = OMXPlayer(Path(MEDIA_FILE_PATH))
+    def test_str_media_file_path(self):
+        player = OMXPlayer(str(MEDIA_FILE_PATH))
         sleep(1)
         player.quit()
 
@@ -48,6 +52,25 @@ class OMXPlayerSetupTests(unittest.TestCase):
         player.load(MEDIA_FILE_PATH)
         sleep(1)
         player.quit()
+
+    def test_exit_event_on_quit(self):
+        player = OMXPlayer(MEDIA_FILE_PATH)
+        exit_fn = Mock()
+        player.exitEvent += exit_fn
+        sleep(1)
+
+        player.quit()
+
+        exit_fn.assert_called_once_with(player, -15)
+
+    def test_exit_event_on_video_end(self):
+        player = OMXPlayer(MEDIA_2_SECOND_FILE_PATH)
+        exit_fn = Mock()
+        player.exitEvent += exit_fn
+
+        sleep(3)
+
+        exit_fn.assert_called_once_with(player, 0)
 
 
 class OMXPlayerRootInterfacePropertiesTest(OMXPlayerTest):
