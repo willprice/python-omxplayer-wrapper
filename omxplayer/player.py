@@ -136,6 +136,8 @@ class OMXPlayer(object):
         self.playEvent = Event()
         #: Event called on stop ``callback(player)``
         self.stopEvent = Event()
+        #: Event called on exit ``callback(player, exit_status)``
+        self.exitEvent = Event()
         #: Event called on seek ``callback(player, relative_position)``
         self.seekEvent = Event()
         #: Event called on setting position ``callback(player, absolute_position)``
@@ -155,13 +157,14 @@ class OMXPlayer(object):
         self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
     def _run_omxplayer(self, source, devnull):
-        def on_exit():
+        def on_exit(self, exit_status):
             logger.info("OMXPlayer process is dead, all DBus calls from here "
                         "will fail")
+            self.exitEvent(self, exit_status)
 
-        def monitor(process, on_exit):
+        def monitor(self, process, on_exit):
             process.wait()
-            on_exit()
+            on_exit(self, process.returncode)
 
         try:
             source = str(source.resolve())
@@ -176,7 +179,7 @@ class OMXPlayer(object):
                                    stdout=devnull,
                                    preexec_fn=os.setsid)
         self._process_monitor = threading.Thread(target=monitor,
-                                                 args=(process, on_exit))
+                                                 args=(self,process, on_exit))
         self._process_monitor.start()
         return process
 
