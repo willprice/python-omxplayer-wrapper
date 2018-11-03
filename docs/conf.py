@@ -128,7 +128,6 @@ html_theme_options = {
     'github_count': True,
     'github_banner': True,
     'description': 'A library for controlling omxplayer via dbus',
-    'travis_button': True,
     'codecov_button': True
 }
 
