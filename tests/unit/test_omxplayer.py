@@ -255,7 +255,6 @@ class OMXPlayerTests(unittest.TestCase):
             # verify a new process was started for the second time
             self.assertEqual(popen.call_count, 2)
 
-
     def test_init_without_pause(self, popen, sleep, isfile, killpg, *args):
         with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
             self.patch_and_run_omxplayer()
