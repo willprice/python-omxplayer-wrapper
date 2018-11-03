@@ -6,6 +6,11 @@ python:
   - 3.4
   - 3.5
   - 3.6
+virtualenv:
+  # We have to use the distro packaged python-dbus instead of installing
+  # from PyPi because travis runs on 14.04 which has DBus 1.6 but the
+  # latest python-dbus packaged on PyPi requires 1.8+ to build.
+  system_site_packages: true
 
 cache:
   - pip
@@ -17,6 +22,8 @@ addons:
       - dbus
       - libdbus-1-dev
       - libdbus-glib-1-dev
+      - python-dbus
+      - python3-dbus
 
 before_install:
   - env
