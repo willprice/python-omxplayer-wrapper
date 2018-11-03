@@ -5,6 +5,7 @@ import signal
 import logging
 import threading
 import math
+import atexit
 import sys
 try: # python2
     from urlparse import urlsplit
@@ -183,8 +184,14 @@ class OMXPlayer(object):
             logger.debug('Setting up OMXPlayer process')
             with open(os.devnull, 'w') as devnull:
                 process = self._run_omxplayer(source, devnull)
-                logger.debug('Process opened with PID %s' % process.pid)
-                return process
+
+            def cleanup():
+                process_group_id = os.getpgid(process.pid)
+                os.killpg(process_group_id, signal.SIGTERM)
+
+            atexit.register(cleanup)
+            logger.debug('Process opened with PID %s' % process.pid)
+            return process
 
     def _setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Trying to connect to OMXPlayer via DBus')
