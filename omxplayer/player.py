@@ -199,8 +199,11 @@ class OMXPlayer(object):
                 process = self._run_omxplayer(source, devnull)
 
             def cleanup():
-                process_group_id = os.getpgid(process.pid)
-                os.killpg(process_group_id, signal.SIGTERM)
+                try:
+                    process_group_id = os.getpgid(process.pid)
+                    os.killpg(process_group_id, signal.SIGTERM)
+                except ProcessLookupError:
+                    logger.debug('Process already dead, no need to cleanup')
 
             atexit.register(cleanup)
             logger.debug('Process opened with PID %s' % process.pid)
