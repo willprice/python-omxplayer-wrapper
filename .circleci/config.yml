@@ -17,7 +17,6 @@ shared: &shared
             . venv/bin/activate
             pip install tox
             pip install codecov
-            pip install ".[test, docs]" -e .
 
       - run:
           name: Run tests
