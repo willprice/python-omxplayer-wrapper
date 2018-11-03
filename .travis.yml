@@ -33,8 +33,7 @@ before_install:
   - ls -l ~/virtualenv
 
 install:
-  - pip install pipenv
-  - pipenv install --dev
+  - pip install -e .
 
 script:
   - make test
