@@ -151,7 +151,7 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
     def test_metadata(self):
         expectedMetadata = {
             'mpris:length': 19691000,
-            'xesam:url': 'file://' + os.path.abspath(self.MEDIA_FILE_PATH)
+            'xesam:url': 'file://' + os.path.abspath(MEDIA_FILE_PATH)
         }
         self.assertEqual(expectedMetadata, self.player.metadata())
 
