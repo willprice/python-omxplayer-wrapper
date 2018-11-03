@@ -42,6 +42,7 @@ setup(
         'dbus-python',
         'evento',
         'decorator',
+        'pathlib2',
     ],
     extras_require={
         'test': [
