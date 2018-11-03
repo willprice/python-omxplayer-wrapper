@@ -120,14 +120,20 @@ class OMXPlayer(object):
 
     """
     def __init__(self, source,
-                 args=[],
+                 args=None,
                  bus_address_finder=None,
                  Connection=None,
                  dbus_name=None,
                  pause=False):
         logger.debug('Instantiating OMXPlayer')
 
-        self.args = args
+        if args is None:
+            self.args = []
+        elif isinstance(args, str):
+            import shlex
+            self.args = shlex.split(args)
+        else:
+            self.args = args
         self._is_playing = True
         self._source = Path(source)
         self._dbus_name = dbus_name
