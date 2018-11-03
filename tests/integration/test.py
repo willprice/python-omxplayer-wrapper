@@ -97,12 +97,12 @@ class OMXPlayerPlayerInterfacePropertiesTest(OMXPlayerTest):
         self.assertEqual("Paused", self.player.playback_status())
 
     def test_volume(self):
-        self.assertEqual(1.0, self.player.volume(), _VOLUME_DP)
+        self.assertEqual(0.0, self.player.volume(), _VOLUME_DP)
 
     def test_set_volume(self):
+        self.assertAlmostEqual(0.0, self.player.volume(), _VOLUME_DP)
+        self.player.set_volume(1)
         self.assertAlmostEqual(1.0, self.player.volume(), _VOLUME_DP)
-        self.player.set_volume(2)
-        self.assertAlmostEqual(2.0, self.player.volume(), _VOLUME_DP)
 
     def test_position(self):
         self.assertTrue(self.player.position() < 1.0)
@@ -206,6 +206,7 @@ class OMXPlayerPlayerInterfaceMethodsTest(OMXPlayerTest):
     def test_unmute(self):
         self.player.set_volume(1)
         self.player.mute()
+        self.assertAlmostEqual(0, self.player.volume(), _VOLUME_DP)
 
         self.player.unmute()
         self.assertAlmostEqual(1, self.player.volume(), _VOLUME_DP)
