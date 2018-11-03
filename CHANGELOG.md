@@ -1,8 +1,9 @@
 # 0.2.5 -> 0.3.0
 
-* Change `set_volume` and `volume` to work with values between 0-10 instead of
+* Change `set_volume` to work with values between 0-10 instead of
   millibels
-* Fix `set_volume` and `volume`
+* Fix `volume` to return actual volume rather than just 1.0
+* Fix `rate` to return actual rate rather than just 1.0
 * Support providing arguments as a `str` which is then split with `shlex.split`,
   i.e. you don't have to provide a list of shell split args if you don't want to.
 * Support `str` media file path in `OMXPlayer` constructor.
