@@ -8,13 +8,7 @@ init:
 
 .PHONY: test
 test:
-	nosetests \
-		--with-coverage \
-		--cover-erase \
-		--cover-xml \
-		--cover-branches \
-		--cover-package=omxplayer \
-		tests/unit
+	tox -e py36
 
 .PHONY: test
 test-all:

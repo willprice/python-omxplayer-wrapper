@@ -5,7 +5,7 @@ import signal
 import dbus
 
 from parameterized import parameterized
-from mock import patch, Mock, PropertyMock, call, mock_open
+from mock import patch, Mock, call, mock_open
 
 from omxplayer.dbus_connection import DBusConnectionError
 from omxplayer.player import OMXPlayer
@@ -16,10 +16,10 @@ else:
     builtin = 'builtins'
 
 
-
 MOCK_OPEN = mock_open()
 
 
+@patch('atexit.register')
 @patch('{}.open'.format(builtin), MOCK_OPEN)
 @patch('os.killpg')
 @patch('os.path.isfile')
@@ -51,7 +51,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['can_set_fullscreen', 'CanSetFullscreen', [], []],
         ['identity', 'Identity', [], []]
     ])
-    def test_root_interface_properties(self, popen, sleep, isfile, killpg, command_name,
+    def test_root_interface_properties(self, popen, sleep, isfile, killpg, atexit, command_name,
                                        property_name, command_args, expected_dbus_call_args):
         self.patch_and_run_omxplayer()
         self.player._root_interface.dbus_interface = "org.mpris.MediaPlayer2"
@@ -63,7 +63,6 @@ class OMXPlayerTests(unittest.TestCase):
         expected_call = call.Get("org.mpris.MediaPlayer2", property_name, *expected_dbus_call_args)
         interface.assert_has_calls([expected_call])
 
-
     @parameterized.expand([
         ['pause', 'Pause', [], []],
         ['stop', 'Stop', [], []],
@@ -74,7 +73,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['unmute', 'Unmute', [], []],
         ['action', 'Action', ['p'], ['p']]
     ])
-    def test_player_interface_commands(self, popen, sleep, isfile, killpg, command_name,
+    def test_player_interface_commands(self, popen, sleep, isfile, killpg, atexit, command_name,
                                        interface_command_name, command_args, expected_dbus_call_args):
         self.patch_and_run_omxplayer()
         self.player._player_interface.dbus_interface = "org.mpris.MediaPlayer2"
@@ -93,11 +92,11 @@ class OMXPlayerTests(unittest.TestCase):
         ['playback_status', 'PlaybackStatus', "playing", dbus.String("playing")],
         ['position', 'Position', 1.2, dbus.Int64(1.2 * 1000 * 1000)],
         ['duration', 'Duration', 10.1, dbus.Int64(10.1 * 1000 * 1000)],
-        ['volume', 'Volume', 2000.0, dbus.Int64(10)],
+        ['volume', 'Volume', 10, dbus.Int64(10)],
         ['minimum_rate', 'MinimumRate', 0.1, dbus.Double(0.1)],
         ['maximum_rate', 'MaximumRate', 4.0, dbus.Double(4.0)],
     ])
-    def test_player_interface_properties(self, popen, sleep, isfile, killpg,
+    def test_player_interface_properties(self, popen, sleep, isfile, killpg, atexit,
                         command_name, property_name, expected_result, property_result):
         interface_address = "org.mpris.MediaPlayer2"
         self.patch_and_run_omxplayer()
@@ -120,7 +119,7 @@ class OMXPlayerTests(unittest.TestCase):
             self.player.quit()
             killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
 
-    def test_quitting_waits_for_omxplayer_to_die(self, popen, sleep, isfile, killpg, *args):
+    def test_quitting_waits_for_omxplayer_to_die(self, popen, *args):
         omxplayer_process = Mock()
         popen.return_value = omxplayer_process
         self.patch_and_run_omxplayer()
@@ -255,13 +254,13 @@ class OMXPlayerTests(unittest.TestCase):
             # verify a new process was started for the second time
             self.assertEqual(popen.call_count, 2)
 
-    def test_init_without_pause(self, popen, sleep, isfile, killpg, *args):
-        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+    def test_init_without_pause(self, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as pause_method:
             self.patch_and_run_omxplayer()
-            self.assertEqual(mock_method.call_count, 0)
+            self.assertEqual(pause_method.call_count, 0)
 
-    def test_init_pause(self, popen, sleep, isfile, killpg, *args):
-        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+    def test_init_pause(self, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as pause_method:
             # self.patch_and_run_omxplayer(pause=False)
             bus_address_finder = Mock()
             bus_address_finder.get_address.return_val = "example_bus_address"
@@ -270,16 +269,20 @@ class OMXPlayerTests(unittest.TestCase):
                                 Connection=Mock(),
                                 pause=True)
 
-            self.assertEqual(mock_method.call_count, 1)
+            self.assertEqual(pause_method.call_count, 1)
 
-    def test_load_and_pause(self, popen, sleep, isfile, killpg, *args):
-        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+    def test_load_and_pause(self, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as pause_method:
             self.patch_and_run_omxplayer()
             self.player.load('./test2.mp4', pause=True)
-            self.assertEqual(mock_method.call_count, 1)
+            self.assertEqual(pause_method.call_count, 1)
 
-    def test_load_without_pause(self, popen, sleep, isfile, killpg, *args):
-        with patch.object(OMXPlayer, 'pause', return_value=None) as mock_method:
+    def test_load_without_pause(self, *args):
+        with patch.object(OMXPlayer, 'pause', return_value=None) as pause_method:
             self.patch_and_run_omxplayer()
             self.player.load('./test2.mp4')
-            self.assertEqual(mock_method.call_count, 0)
+            self.assertEqual(pause_method.call_count, 0)
+
+    def test_register_quit_handler_atexit(self, popen, sleep, isfile, killpg, atexit):
+        self.patch_and_run_omxplayer()
+        atexit.assert_called_once_with(self.player.quit)
