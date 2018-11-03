@@ -8,7 +8,7 @@ init:
 
 .PHONY: test
 test:
-	tox -e py36
+	pytest tests/unit --cov-branch --cov=omxplayer
 
 .PHONY: test
 test-all:
