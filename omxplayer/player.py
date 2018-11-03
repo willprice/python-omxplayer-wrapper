@@ -24,14 +24,16 @@ from omxplayer.dbus_connection import DBusConnection, \
 
 from evento import Event
 
-#### CONSTANTS ####
+
+# CONSTANTS
+
 RETRY_DELAY = 0.05
 
 
-#### FILE GLOBAL OBJECTS ####
+# FILE GLOBAL OBJECTS
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
 
 
 def _check_player_is_active(fn):
@@ -49,6 +51,7 @@ def _check_player_is_active(fn):
 
     return decorator(wrapped, fn)
 
+
 def _from_dbus_type(fn):
     def from_dbus_type(dbusVal):
         def from_dbus_dict(dbusDict):
@@ -65,7 +68,6 @@ def _from_dbus_type(fn):
             dbus.types.Byte: int,
             dbus.types.Int16: int,
             dbus.types.Int32: int,
-            dbus.types.UInt32: int,
             dbus.types.Int64: int,
             dbus.types.UInt32: int,
             dbus.types.UInt64: int,
@@ -84,7 +86,10 @@ def _from_dbus_type(fn):
 
     return decorator(wrapped, fn)
 
-#### CLASSES ####
+
+# CLASSES
+
+
 class FileNotFoundError(Exception):
     pass
 
@@ -144,6 +149,7 @@ class OMXPlayer(object):
             self.quit()
 
         self._process = self._setup_omxplayer_process(source)
+        self._rate = 1.0
         self._connection = self._setup_dbus_connection(self._Connection, self._bus_address_finder)
 
     def _run_omxplayer(self, source, devnull):
@@ -398,9 +404,9 @@ class OMXPlayer(object):
     def rate(self):
         """
         Returns:
-            float: playback rate, 1 is the normal rate, 0.5 would be half speed and 2 would be double speed.
+            float: playback rate, 1 is the normal rate, 2 would be double speed.
         """
-        return self._player_interface_property('Rate')
+        return self._rate
 
     @_check_player_is_active
     @_from_dbus_type
@@ -414,7 +420,8 @@ class OMXPlayer(object):
             >>> player.set_rate(0.5)
             # Will play half speed
         """
-        return self._player_interface_property('Rate', dbus.Double(rate))
+        self._rate = self._player_interface_property('Rate', dbus.Double(rate))
+        return self._rate
 
     @_check_player_is_active
     @_from_dbus_type
