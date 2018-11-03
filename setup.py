@@ -38,9 +38,8 @@ setup(
                       'media']),
 
     packages=find_packages(exclude=['*tests']),
-    # Depends on dbus-python which is only shipped via package managers or as a
-    # source dist (incompatible with distutils)
     install_requires=[
+        'dbus-python',
         'evento',
         'decorator',
     ],
