@@ -134,7 +134,7 @@ class OMXPlayer(object):
             import shlex
             self.args = shlex.split(args)
         else:
-            self.args = args
+            self.args = list(map(str, args))
         self._is_playing = True
         self._source = Path(source)
         self._dbus_name = dbus_name
