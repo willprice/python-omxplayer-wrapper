@@ -4,12 +4,16 @@ import os
 import signal
 import logging
 import threading
-import math
 import atexit
 import sys
-try: # python2
+try:  # python 3
+    from pathlib import Path
+except ImportError:  # python2
+    from pathlib2 import Path
+
+try:  # python2
     from urlparse import urlsplit
-except ImportError: # python3
+except ImportError:  # python3
     from urllib.parse import urlsplit
 
 if sys.version_info > (3,):
@@ -125,7 +129,7 @@ class OMXPlayer(object):
 
         self.args = args
         self._is_playing = True
-        self._source = source
+        self._source = Path(source)
         self._dbus_name = dbus_name
         self._Connection = Connection if Connection else DBusConnection
         self._bus_address_finder = bus_address_finder if bus_address_finder else BusFinder()
