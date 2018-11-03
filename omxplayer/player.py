@@ -111,13 +111,14 @@ class OMXPlayer(object):
 
     Args:
         source (str): Path to the file (as ~/Videos/my-video.mp4) or URL you wish to play
-        args (list): used to pass option parameters to omxplayer.  see: https://github.com/popcornmix/omxplayer#synopsis
+        args (list/str): used to pass option parameters to omxplayer.  see: https://github.com/popcornmix/omxplayer#synopsis
 
 
     Multiple argument example:
 
     >>> OMXPlayer('path.mp4', args=['--no-osd', '--no-keys', '-b'])
-
+    >>> OMXPlayer('path.mp4', args='--no-osd --no-keys -b')
+    >>> OMXPlayer('path.mp4', dbus_name='org.mpris.MediaPlayer2.omxplayer2')
     """
     def __init__(self, source,
                  args=None,
