@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from pathlib import Path
 from time import sleep
 import os
 import dbus
@@ -13,16 +13,41 @@ _TIME_DP=0
 _RATE_DP=2
 _VOLUME_DP=3
 
+MEDIA_FILE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../media/test_media_1.mp4')
+
 
 class OMXPlayerTest(unittest.TestCase):
-    MEDIA_FILE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../media/test_media_1.mp4')
-
     def setUp(self):
-        self.player = OMXPlayer(self.MEDIA_FILE_PATH)
-        sleep(1) # Give the player time to start up
+        self.player = OMXPlayer(MEDIA_FILE_PATH)
+        sleep(1)  # Give the player time to start up
 
     def tearDown(self):
         self.player.quit()
+
+
+class OMXPlayerSetupTests(unittest.TestCase):
+
+    def test_args_list_constructor(self):
+        player = OMXPlayer(MEDIA_FILE_PATH, args=['--layer', '2', '--orientation', '90'])
+        sleep(1)
+        player.quit()
+
+    def test_args_str_constructor(self):
+        player = OMXPlayer(MEDIA_FILE_PATH, args='--layer 2 --orientation 90')
+        sleep(1)
+        player.quit()
+
+    def test_pathlib_path_media_file(self):
+        player = OMXPlayer(Path(MEDIA_FILE_PATH))
+        sleep(1)
+        player.quit()
+
+    def test_load(self):
+        player = OMXPlayer(MEDIA_FILE_PATH)
+        sleep(1)
+        player.load(MEDIA_FILE_PATH)
+        sleep(1)
+        player.quit()
 
 
 class OMXPlayerRootInterfacePropertiesTest(OMXPlayerTest):
