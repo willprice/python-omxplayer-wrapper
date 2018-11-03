@@ -25,8 +25,8 @@ You can read the docs at `python-omxplayer-wrapper.rtfd.org
 .. |Documentation Status| image:: https://readthedocs.org/projects/python-omxplayer-wrapper/badge?version=master
    :target: http://python-omxplayer-wrapper.readthedocs.io/en/master?badge=master
    :alt: Documentation Status
-.. |Build Status| image:: https://travis-ci.org/willprice/python-omxplayer-wrapper.svg?branch=master
-   :target: https://travis-ci.org/willprice/python-omxplayer-wrapper
+.. |Build Status| image:: https://circleci.com/gh/willprice/python-omxplayer-wrapper/tree/master.svg?style=shield
+   :target: https://circleci.com/gh/willprice/python-omxplayer-wrapper/tree/master
 .. |Code Coverage| image:: https://codecov.io/gh/willprice/python-omxplayer-wrapper/branch/develop/graph/badge.svg
    :target: https://codecov.io/gh/willprice/python-omxplayer-wrapper
 .. |Say Thanks!| image:: https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg
