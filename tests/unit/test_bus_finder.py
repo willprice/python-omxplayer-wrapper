@@ -12,13 +12,12 @@ else:
     builtin = 'builtins'
 from omxplayer.bus_finder import BusFinder
 
-#### CONSTANTS ####
+# CONSTANTS
 EXAMPLE_DBUS_FILE_CONTENTS = 'EXAMPLE_CONTENTS'
 MOCK_OPEN = mock_open(read_data=EXAMPLE_DBUS_FILE_CONTENTS)
 
 
-
-#### CLASSES ####
+# CLASSES
 class BusFinderTests(unittest.TestCase):
     dbus_file_path = '/tmp/omxplayerdbus'
 

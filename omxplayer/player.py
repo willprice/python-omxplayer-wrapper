@@ -6,6 +6,9 @@ import logging
 import threading
 import atexit
 import sys
+
+from mock import Mock
+
 try:  # python 3
     from pathlib import Path
 except ImportError:  # python2
@@ -185,30 +188,30 @@ class OMXPlayer(object):
         if self._dbus_name:
             command += ['--dbus_name', self._dbus_name]
         logger.debug("Opening omxplayer with the command: %s" % command)
+        # By running os.setsid in the fork-ed process we create a process group
+        # which is used to kill the subprocesses the `omxplayer` script
+        # (it is a bash script itself that calls omxplayer.bin) creates. Without
+        # doing this we end up in a scenario where we kill the shell script, but not
+        # the forked children of the shell script.
+        # See https://pymotw.com/2/subprocess/#process-groups-sessions for examples on this
         process = subprocess.Popen(command,
                                    stdin=devnull,
                                    stdout=devnull,
                                    preexec_fn=os.setsid)
         self._process_monitor = threading.Thread(target=monitor,
-                                                 args=(self,process, on_exit))
+                                                 args=(self, process, on_exit))
         self._process_monitor.start()
         return process
 
     def _setup_omxplayer_process(self, source):
-            logger.debug('Setting up OMXPlayer process')
-            with open(os.devnull, 'w') as devnull:
-                process = self._run_omxplayer(source, devnull)
+        logger.debug('Setting up OMXPlayer process')
 
-            def cleanup():
-                try:
-                    process_group_id = os.getpgid(process.pid)
-                    os.killpg(process_group_id, signal.SIGTERM)
-                except ProcessLookupError:
-                    logger.debug('Process already dead, no need to cleanup')
+        with open(os.devnull, 'w') as devnull:
+            process = self._run_omxplayer(source, devnull)
+        logger.debug('Process opened with PID %s' % process.pid)
 
-            atexit.register(cleanup)
-            logger.debug('Process opened with PID %s' % process.pid)
-            return process
+        atexit.register(self.quit)
+        return process
 
     def _setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Trying to connect to OMXPlayer via DBus')
