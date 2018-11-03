@@ -1,3 +1,3 @@
 from omxplayer.player import OMXPlayer
-
-__version__ = '0.2.6'
+from .__version__ import __title__, __description__, __version__
+from .__version__ import __author__, __license__, __copyright__
