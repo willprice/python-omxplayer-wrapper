@@ -33,7 +33,7 @@ before_install:
   - ls -l ~/virtualenv
 
 install:
-  - pip install -e .
+  - pip install ".[test, docs]" -e .
 
 script:
   - make test
