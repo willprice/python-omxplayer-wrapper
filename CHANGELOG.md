@@ -1,3 +1,7 @@
+# 0.3.0 -> 0.3.1
+* Remove `tests` package from distribution
+* Support calling `quit` multiple times without raising exception
+
 # 0.2.5 -> 0.3.0
 
 * Change `set_volume` to work with values between 0-10 instead of

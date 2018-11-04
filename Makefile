@@ -3,8 +3,7 @@ PYTHON3:=python3
 
 .PHONY: init
 init:
-	pip install pipenv
-	pipenv install --dev
+	pip install ".[test,docs]" -e .
 
 .PHONY: test
 test:
@@ -15,15 +14,12 @@ test-all:
 	tox
 
 .PHONY: dist
-dist: test-all
+dist:
+	$(PYTHON3) setup.py sdist
 	$(PYTHON3) setup.py bdist_wheel --universal
 
-dist-upload: clean-dist dist
+dist-upload: clean dist
 	twine upload dist/*
-
-clean-dist:
-	rm -rf build
-	rm -rf dist
 
 .PHONY: doc
 doc:
@@ -32,3 +28,6 @@ doc:
 .PHONY: doc-serve
 doc-serve: doc
 	cd docs/build/html && $(PYTHON3) -m http.server
+
+clean:
+	rm -rf dist build $(shell find . -iname '*.egg-info')
