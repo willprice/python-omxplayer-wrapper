@@ -4,11 +4,10 @@ Python OMXPlayer wrapper
 |PyPI Version| |PyPI Python versions| |PyPI License| |Documentation Status| 
 |Build Status| |Code Coverage| |Say Thanks!|
 
-.. include:: docs/tagline.rst
+omxplayer-wrapper is a project to control `OMXPlayer
+<https://github.com/popcornmix/omxplayer>`_ from python over `dbus
+<https://www.freedesktop.org/wiki/Software/dbus/>`_.
 
-.. include:: docs/installation.rst
-
-.. include:: docs/examples.rst
 
 Docs
 ----
