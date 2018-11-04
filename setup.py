@@ -68,7 +68,7 @@ setup(
                        'video',
                        'media']),
 
-    packages=find_packages(exclude=['*tests']),
+    packages=find_packages(exclude=['*test*']),
     install_requires=lib_deps,
     test_requires=test_deps,
     extras_require={
