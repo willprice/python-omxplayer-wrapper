@@ -1,3 +1,6 @@
+# 0.3.1 -> 0.3.2
+* Remove unused imports (`mock`) causing errors (#157)
+
 # 0.3.0 -> 0.3.1
 * Remove `tests` package from distribution
 * Support calling `quit` multiple times without raising exception

@@ -7,20 +7,12 @@ import threading
 import atexit
 import sys
 
-from mock import Mock
 
 try:  # python 3
     from pathlib import Path
 except ImportError:  # python2
     from pathlib2 import Path
 
-try:  # python2
-    from urlparse import urlsplit
-except ImportError:  # python3
-    from urllib.parse import urlsplit
-
-if sys.version_info > (3,):
-    long = int
 
 from decorator import decorator
 from dbus import DBusException, Int64, String, ObjectPath
