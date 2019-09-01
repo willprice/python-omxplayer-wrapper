@@ -68,6 +68,7 @@ class OMXPlayerTests(unittest.TestCase):
         ['stop', 'Stop', [], []],
         ['seek', 'Seek', [100], [dbus.Int64(100 * 1e6)]],
         ['set_position', 'SetPosition', [1], [dbus.ObjectPath("/not/used"), dbus.Int64(1000000)]],
+        ['set_layer', 'SetLayer', [1], [dbus.Int64(1)]],
         ['list_subtitles', 'ListSubtitles', [], []],
         ['mute', 'Mute', [], []],
         ['unmute', 'Unmute', [], []],

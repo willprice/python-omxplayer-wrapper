@@ -576,6 +576,17 @@ class OMXPlayer(object):
 
     @_check_player_is_active
     @_from_dbus_type
+    def set_layer(self, layer):
+        """
+        Set the layer of the Video (default 0). Higher layers are above lower layers
+
+        Args:
+            layer (int): The Layer to switch to.
+        """
+        self._player_interface.SetLayer(Int64(layer))
+
+    @_check_player_is_active
+    @_from_dbus_type
     def set_alpha(self, alpha):
         """
         Set the transparency of the video overlay
