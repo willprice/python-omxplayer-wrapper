@@ -578,7 +578,7 @@ class OMXPlayer(object):
     @_from_dbus_type
     def set_layer(self, layer):
         """
-        Set the layer of the Video
+        Set the layer of the Video (default 0). Higher layers are above lower layers
 
         Args:
             layer (int): The Layer to switch to.
