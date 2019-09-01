@@ -574,6 +574,18 @@ class OMXPlayer(object):
         self._player_interface.SetPosition(ObjectPath("/not/used"), Int64(position * 1000.0 * 1000))
         self.positionEvent(self, position)
 
+
+    @_check_player_is_active
+    @_from_dbus_type
+    def set_layer(self, layer):
+        """
+        Set the layer of the Video
+
+        Args:
+            layer (int): The Layer to switch to.
+        """
+        self._player_interface.SetLayer(Int64(alpha))
+
     @_check_player_is_active
     @_from_dbus_type
     def set_alpha(self, alpha):
