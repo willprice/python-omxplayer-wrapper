@@ -583,7 +583,7 @@ class OMXPlayer(object):
         Args:
             layer (int): The Layer to switch to.
         """
-        self._player_interface.SetLayer(Int64(alpha))
+        self._player_interface.SetLayer(Int64(layer))
 
     @_check_player_is_active
     @_from_dbus_type
