@@ -34,10 +34,6 @@ jobs:
     <<: *shared
     docker:
       - image: circleci/python:2.7
-  py3.4:
-    <<: *shared
-    docker:
-      - image: circleci/python:3.4
   py3.5:
     <<: *shared
     docker:
@@ -56,7 +52,6 @@ workflows:
   test:
     jobs:
       - py2.7
-      - py3.4
       - py3.5
       - py3.6
       - py3.7
