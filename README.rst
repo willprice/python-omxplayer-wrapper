@@ -30,3 +30,19 @@ You can read the docs at `python-omxplayer-wrapper.rtfd.org
    :target: https://codecov.io/gh/willprice/python-omxplayer-wrapper
 .. |Say Thanks!| image:: https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg
    :target: https://saythanks.io/to/willprice
+
+FAQ
+----
+
+How do I create multiple players?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You need to make sure each player has a separate DBus name like so:
+
+..  code-block:: python
+
+   player1 = OMXPlayer(file_1,
+                       dbus_name='org.mpris.MediaPlayer2.omxplayer1')
+   player2 = OMXPlayer(file_2,
+                       dbus_name='org.mpris.MediaPlayer2.omxplayer2')
+
