@@ -205,6 +205,14 @@ class OMXPlayer(object):
         atexit.register(self.quit)
         return process
 
+    def _terminate_process(self, process):
+        try:
+            process_group_id = os.getpgid(process.pid)
+            os.killpg(process_group_id, signal.SIGTERM)
+            logger.debug('SIGTERM Sent to pid: %s' % process_group_id)
+        except OSError:
+            logger.error('Could not find the process to kill')
+
     def _setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Trying to connect to OMXPlayer via DBus')
         tries = 0
@@ -846,15 +854,10 @@ class OMXPlayer(object):
         if self._process is None:
             logger.debug('Quit was called after self._process had already been released')
             return
-        try:
-            logger.debug('Quitting OMXPlayer')
-            process_group_id = os.getpgid(self._process.pid)
-            os.killpg(process_group_id, signal.SIGTERM)
-            logger.debug('SIGTERM Sent to pid: %s' % process_group_id)
-            self._process_monitor.join()
-        except OSError:
-            logger.error('Could not find the process to kill')
 
+        logger.debug('Quitting OMXPlayer')
+        self._terminate_process(self._process)
+        self._process_monitor.join()
         self._process = None
 
     @_check_player_is_active
