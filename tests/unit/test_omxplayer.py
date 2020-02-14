@@ -46,6 +46,24 @@ class OMXPlayerTests(unittest.TestCase):
             self.patch_and_run_omxplayer(Connection=dbus_connection)
             self.assertEqual(50, self.player.tries)
 
+    def test_dbus_failure_kills(self, popen, sleep, isfile, killpg, *args):
+        omxplayer_process = Mock()
+        popen.return_value = omxplayer_process
+        dbus_connection = Mock(side_effect=DBusConnectionError)
+        with patch('os.getpgid', Mock(return_value=omxplayer_process.pid)):
+            with self.assertRaises(SystemError):
+                self.patch_and_run_omxplayer(Connection=dbus_connection)
+            killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
+
+    def test_thread_failure_kills(self, popen, sleep, isfile, killpg, *args):
+        omxplayer_process = Mock()
+        popen.return_value = omxplayer_process
+        with patch ('threading.Thread', Mock(side_effect=RuntimeError)):
+            with patch('os.getpgid', Mock(return_value=omxplayer_process.pid)):
+                with self.assertRaises(RuntimeError):
+                    self.patch_and_run_omxplayer()
+                killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
+
     @parameterized.expand([
         ['can_quit', 'CanQuit', [], []],
         ['can_set_fullscreen', 'CanSetFullscreen', [], []],
