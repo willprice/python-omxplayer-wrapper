@@ -146,6 +146,27 @@ class OMXPlayerTests(unittest.TestCase):
             self.player.quit()
             omxplayer_process.wait.assert_has_calls([call()])
 
+    def test_quitting_when_already_dead(self, popen, sleep, isfile, killpg, *args):
+        omxplayer_process = Mock()
+        popen.return_value = omxplayer_process
+        self.patch_and_run_omxplayer()
+        # Pretend the process is already dead
+        killpg.configure_mock(side_effect=OSError)
+        with patch('os.getpgid', Mock(return_value=omxplayer_process.pid)):
+            # This tests that quit handles the OSError
+            self.player.quit()
+            killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
+
+    def test_quitting_twice(self, popen, sleep, isfile, killpg, *args):
+        omxplayer_process = Mock()
+        popen.return_value = omxplayer_process
+        self.patch_and_run_omxplayer()
+        with patch('os.getpgid', Mock(return_value=omxplayer_process.pid)):
+            # This should not raise, and call killpg once
+            self.player.quit()
+            self.player.quit()
+            killpg.assert_called_once_with(omxplayer_process.pid, signal.SIGTERM)
+
     def test_check_process_still_exists_before_dbus_call(self, *args):
         self.patch_and_run_omxplayer()
         self.player._process = process = Mock(return_value=None)
