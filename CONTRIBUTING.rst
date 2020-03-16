@@ -16,23 +16,55 @@ Thou shalt receive cookies for your welcomed contribution.
 Development
 -----------
 
-Locally
-~~~~~~~
+1. Set up a virtual environment 
 
-Ensure you have all the development dependencies:
+   .. code:: console
 
-.. code:: bash
+       $ python3 -m venv .venv
+       $ .venv/bin/activate
 
-    $ pipenv install --dev
+2. Install package in editable mode with dependencies
 
-Install the library in *development* mode so you can test it out whilst
-developing features.
+   .. code:: console
 
-.. code:: bash
+       $ pip install ".[test,docs]" -e . 
 
-    $ python setup.py develop
+3. Run unit tests
 
-On a raspberry pi
+   .. code:: console
+
+       $ make test              # run under current python version
+
+       $ pip install tox pyenv tox-pyenv  # Install pyenv tox to run under all python versions
+       $ git clone https://github.com/momo-lab/xxenv-latest.git "$(pyenv root)"/plugins/xxenv-latest
+       $ for v in 2.7 3.4 3.5 3.6 3.7; do pyenv la test install "$v"; done
+       $ pyenv versions --base > .python-version
+       $ make test-all          # run under tox for all supported python versions
+
+4. Run integration tests (on Raspberry Pi)
+
+   .. code:: console
+
+       $ make test-integration
+
+
+5. Build docs
+
+   .. code:: console
+
+       $ make doc
+       $ make doc-serve   # run HTTP server to view docs
+
+6. Run examples
+
+   .. code:: console
+
+       $ cd examples
+       $ PYTHONPATH=.. python3 video_file.py
+       $ PYTHONPATH=.. python3 advanced_usage.py
+
+
+On a Raspberry Pi
 ~~~~~~~~~~~~~~~~~
 
 There's also an Ansible playbook in ``devenv`` which will set up a
