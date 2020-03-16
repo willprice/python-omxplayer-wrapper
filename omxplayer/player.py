@@ -190,10 +190,15 @@ class OMXPlayer(object):
                                    stdin=devnull,
                                    stdout=devnull,
                                    preexec_fn=os.setsid)
-        self._process_monitor = threading.Thread(target=monitor,
-                                                 args=(self, process, on_exit))
-        self._process_monitor.start()
-        return process
+        try:
+            self._process_monitor = threading.Thread(target=monitor,
+                                                     args=(self, process, on_exit))
+            self._process_monitor.start()
+            return process
+        except:
+            # Make sure to not leave any dangling process on failure
+            self._terminate_process(process)
+            raise
 
     def _setup_omxplayer_process(self, source):
         logger.debug('Setting up OMXPlayer process')
@@ -204,6 +209,14 @@ class OMXPlayer(object):
 
         atexit.register(self.quit)
         return process
+
+    def _terminate_process(self, process):
+        try:
+            process_group_id = os.getpgid(process.pid)
+            os.killpg(process_group_id, signal.SIGTERM)
+            logger.debug('SIGTERM Sent to pid: %s' % process_group_id)
+        except OSError:
+            logger.error('Could not find the process to kill')
 
     def _setup_dbus_connection(self, Connection, bus_address_finder):
         logger.debug('Trying to connect to OMXPlayer via DBus')
@@ -234,10 +247,17 @@ class OMXPlayer(object):
             source (string): Path to the file to play or URL
         """
         self._source = source
-        self._load_source(source)
-        if pause:
-            time.sleep(0.5)  # Wait for the DBus interface to be initialised
-            self.pause()
+        try:
+            self._load_source(source)
+            if pause:
+                time.sleep(0.5)  # Wait for the DBus interface to be initialised
+                self.pause()
+        except:
+            # Make sure we do not leave any dangling process
+            if self._process:
+                self._terminate_process(self._process)
+                self._process = None
+            raise
 
     """ ROOT INTERFACE PROPERTIES """
 
@@ -846,15 +866,10 @@ class OMXPlayer(object):
         if self._process is None:
             logger.debug('Quit was called after self._process had already been released')
             return
-        try:
-            logger.debug('Quitting OMXPlayer')
-            process_group_id = os.getpgid(self._process.pid)
-            os.killpg(process_group_id, signal.SIGTERM)
-            logger.debug('SIGTERM Sent to pid: %s' % process_group_id)
-            self._process_monitor.join()
-        except OSError:
-            logger.error('Could not find the process to kill')
 
+        logger.debug('Quitting OMXPlayer')
+        self._terminate_process(self._process)
+        self._process_monitor.join()
         self._process = None
 
     @_check_player_is_active
