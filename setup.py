@@ -70,7 +70,6 @@ setup(
 
     packages=find_packages(exclude=['*test*']),
     install_requires=lib_deps,
-    test_requires=test_deps,
     extras_require={
         'test': test_deps,
         'docs': doc_deps

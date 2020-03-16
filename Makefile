@@ -1,5 +1,5 @@
-PYTHON2:=python2
-PYTHON3:=python3
+PYTHON2 ?= python2
+PYTHON3 ?= python3
 
 .PHONY: init
 init:
@@ -9,14 +9,17 @@ init:
 test:
 	pytest tests/unit --cov-branch --cov=omxplayer
 
-.PHONY: test
+.PHONY: test-all
 test-all:
 	tox
 
+.PHONY: test-integration
+test-integration:
+	pytest tests/integration/test.py
+
 .PHONY: dist
 dist:
-	$(PYTHON3) setup.py sdist
-	$(PYTHON3) setup.py bdist_wheel --universal
+	$(PYTHON3) setup.py sdist bdist_wheel --universal
 
 dist-upload: clean dist
 	twine upload dist/*
