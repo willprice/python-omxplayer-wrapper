@@ -62,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'omxplayer-wrapper'
-copyright = u'2017, Will Price'
+copyright = u'2020, Will Price'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
