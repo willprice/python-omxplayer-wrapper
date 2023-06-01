@@ -863,6 +863,10 @@ class OMXPlayer(object):
         """
         Quit the player, blocking until the process has died
         """
+        # Close dbus socket to avoid leaking unix socket.
+        if self._connection._bus is not None:
+            self._connection._bus.close()
+            logger.debug('BusConnection closed')
         if self._process is None:
             logger.debug('Quit was called after self._process had already been released')
             return
